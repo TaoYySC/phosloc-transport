@@ -190,6 +190,8 @@ If you use PhosLoc-Transport, please cite the associated manuscript once availab
 
 ## License
 
-No open-source license has been assigned yet. Until a `LICENSE` file is added, reuse, redistribution, and modification are not granted by default.
+The source code in this repository is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-Data bundles may contain third-party resources (for example CPTAC, LinkedOmicsKB, ChIP-Atlas, CollecTRI, UniProt, AlphaFold, or Ensembl-derived files). Users are responsible for following the terms of the original data providers.
+Processed data released separately through Zenodo is licensed under the license specified in the corresponding Zenodo record, except for third-party resources that remain subject to their original terms.
+
+Data bundles may contain or be derived from third-party resources, including CPTAC, LinkedOmicsKB, ChIP-Atlas, CollecTRI, UniProt, AlphaFold, and Ensembl-derived files. Users are responsible for complying with the licenses and terms of use of the original data providers.
