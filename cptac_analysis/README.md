@@ -2,7 +2,7 @@
 
 CPTAC validation module for the PhosLoc-Transport repository.
 
-This subproject links stable PhosLoc-Transport **import** predictions to CPTAC matched tumor multi-omics data and evaluates whether high phosphorylation of predicted import-associated phosphosites is associated with directionally consistent **signed TF target-gene expression** across cancer types.
+This subproject links stable PhosLoc-Transport nuclear accumulation predictions to CPTAC matched tumor multi-omics data and evaluates whether high phosphorylation of predicted nuclear accumulation-associated phosphosites is associated with directionally consistent **signed TF target-gene expression** across cancer types.
 
 ## Analysis overview
 
@@ -28,7 +28,7 @@ The default analysis uses:
 
 | Component | Default behavior |
 |-----------|------------------|
-| Site set | Stable predicted import sites from import/export joint-score outputs |
+| Site set | Stable predicted nuclear accumulation sites from direction-classifier joint-score outputs |
 | Phospho split | `median_nonmissing` split on site phosphoproteomics abundance |
 | Target sets | Signed TF target genes from curated regulons, optionally intersected with ChIP-derived target support |
 | Directional test | High-phospho versus low-phospho target expression in the expected signed direction |
@@ -67,7 +67,7 @@ Public download links are intentionally left blank while the data upload is in p
 | Input bundle | Target path | Download / DOI |
 |--------------|-------------|----------------|
 | Functional data bundle | `../functional/data/` | TBD |
-| Import/export data bundle | `../import_export/data/` | TBD |
+| Direction-classifier data bundle | `../import_export/data/` | TBD |
 | CPTAC / ChIP / regulon source bundle | `data/source/` | TBD |
 
 ## Run integrated pipeline
@@ -164,5 +164,5 @@ The analysis expects local copies of third-party resources. Record exact version
 | [data/README.md](data/README.md) | CPTAC and reference data layout |
 | [../docs/FIGURES_AND_PREDICTION.md](../docs/FIGURES_AND_PREDICTION.md) | Figure, prediction, and CPTAC validation scripts |
 | [../docs/TRAINING_RUNS.md](../docs/TRAINING_RUNS.md) | Finalized classifier training and CPTAC validation details |
-| [../import_export/data/precomputed/1_transport_classifier_results/joint_score/](../import_export/data/precomputed/1_transport_classifier_results/joint_score/) | Stable import/export predictions used as pipeline input |
+| [../import_export/data/precomputed/1_transport_classifier_results/joint_score/](../import_export/data/precomputed/1_transport_classifier_results/joint_score/) | Stable direction predictions used as pipeline input |
 | [../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv](../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv) | Known positive phosphosite labels |

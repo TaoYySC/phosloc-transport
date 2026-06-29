@@ -8,7 +8,7 @@ Public data-download links are intentionally left blank while the data upload is
 |--------|-------------|----------------|
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
 | Functional data bundle | `functional/data/` | TBD |
-| Import/export data bundle | `import_export/data/` | TBD |
+| Direction-classifier data bundle | `import_export/data/` | TBD |
 
 ## Required setup
 
@@ -25,7 +25,7 @@ Public data-download links are intentionally left blank while the data upload is
    rsync -a /path/to/cptac_source/ cptac_analysis/data/source/
    ```
 
-2. Ensure classifier inputs are present under `functional/data/` and `import_export/data/precomputed/` (stable import predictions and known positive site labels).
+2. Ensure classifier inputs are present under `functional/data/` and `import_export/data/precomputed/` (stable nuclear accumulation predictions and known positive site labels).
 
 3. Install `pyensembl` and download the Ensembl release cache before running the integrated pipeline (see [cptac_analysis/README.md](../README.md)).
 
@@ -54,7 +54,7 @@ The integrated pipeline also reads PhosLoc-Transport classifier outputs from the
 
 | Path | Purpose |
 |------|---------|
-| `../../import_export/data/precomputed/1_transport_classifier_results/joint_score/` | Stable import/export site predictions |
+| `../../import_export/data/precomputed/1_transport_classifier_results/joint_score/` | Stable direction-classifier site predictions |
 | `../../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv` | Known positive phosphosite labels |
 
 If `source/` is missing, pass `--linkedomics-base`, `--chip-dir`, and related CLI flags in `run_import_target_regulation_analysis.py` to your local copies.

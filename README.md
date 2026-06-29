@@ -7,14 +7,14 @@ This monorepo contains **three analysis modules**:
 | Subproject | Task |
 |------------|------|
 | [`functional/`](functional/) | Functional transport phosphosite classification |
-| [`import_export/`](import_export/) | Import vs. export direction classification |
-| [`cptac_analysis/`](cptac_analysis/) | CPTAC validation of predicted import-associated phosphosites |
+| [`import_export/`](import_export/) | Nuclear accumulation vs. cytoplasmic redistribution direction classification |
+| [`cptac_analysis/`](cptac_analysis/) | CPTAC validation of predicted nuclear accumulation-associated phosphosites |
 
 Typical workflow:
 
 1. Use the functional transport classifier to score whether a TF phosphosite is likely to regulate nuclear transport.
-2. Use the import/export classifier on transport-positive candidate sites to classify import versus export direction.
-3. Use CPTAC validation to evaluate predicted import-associated sites against tumor multi-omics target-gene regulation.
+2. Use the direction classifier on transport-positive candidate sites to classify nuclear accumulation versus cytoplasmic redistribution.
+3. Use CPTAC validation to evaluate predicted nuclear accumulation-associated sites against tumor multi-omics target-gene regulation.
 
 ## Requirements
 
@@ -64,7 +64,7 @@ python scripts/predict_functional_transport.py \
 
 Main output columns include per-fold probabilities (`prob_fold_*`), `mean_prob`, `std_prob`, and, when `--with-threshold` is used, `final_threshold` and `pred_label`.
 
-Run Stage 2 import/export direction prediction on transport-positive candidate sites:
+Run direction prediction on transport-positive candidate sites:
 
 ```bash
 cd import_export
@@ -120,7 +120,7 @@ Public data-download links are intentionally left blank while the data upload is
 | Data bundle | Target path | Download / DOI |
 |-------------|-------------|----------------|
 | Functional training, prediction, and plotting data | `functional/data/` | TBD |
-| Import/export training, prediction, and plotting data | `import_export/data/` | TBD |
+| Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | TBD |
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
 
 Reproducing the finalized runs requires processed feature files, training splits, model configs, and run metadata snapshots bundled under each subproject's `data/` and `configs/` trees. Without the data bundles, the repository can be inspected but training, prediction, plotting, and CPTAC analysis will not run end to end.
@@ -159,7 +159,7 @@ The finalized training runs are recorded below.
 | Pipeline | Original run |
 |----------|--------------|
 | Functional transport | `run_20260610_204935_ESM Window+Site+PDB` |
-| Import/export direction | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
+| Nuclear accumulation / cytoplasmic redistribution direction | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
 | CPTAC validation | `results/import_target_regulation/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.
@@ -172,7 +172,7 @@ Run metadata snapshots for Stages 1-2 are stored under each subproject's `config
 | [docs/FIGURES_AND_PREDICTION.md](docs/FIGURES_AND_PREDICTION.md) | Figure and prediction scripts |
 | [DATA.md](DATA.md) | Train / plot / predict data layout |
 | [functional/README.md](functional/README.md) | Functional pipeline overview |
-| [import_export/README.md](import_export/README.md) | Import/export pipeline overview |
+| [import_export/README.md](import_export/README.md) | Direction-classifier pipeline overview |
 | [cptac_analysis/README.md](cptac_analysis/README.md) | CPTAC validation overview |
 
 ## Troubleshooting

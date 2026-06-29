@@ -1,15 +1,15 @@
-# Import/export direction classifier
+# Nuclear accumulation / cytoplasmic redistribution direction classifier
 
 Stage 2 training and inference pipeline for the PhosLoc-Transport repository.
 
-This subproject trains a binary classifier that predicts **nuclear import versus nuclear export** among annotated transport-positive transcription factor phosphosites (Import as the positive class). It does **not** classify functional transport activity against background phosphosites; that task is handled by the [`functional/`](../functional/) subproject.
+This subproject trains a binary classifier that predicts **nuclear accumulation versus cytoplasmic redistribution** among annotated transport-positive transcription factor phosphosites. Historical model labels and file paths use `Import` as the positive class and `Export` as the negative class. It does **not** classify functional transport activity against background phosphosites; that task is handled by the [`functional/`](../functional/) subproject.
 
 ## Finalized model
 
 | Field | Value |
 |-------|-------|
-| Task | Import vs. export direction classification |
-| Label convention | Import = 1, Export = 0 |
+| Task | Nuclear accumulation vs. cytoplasmic redistribution direction classification |
+| Label convention | Legacy labels: Import = 1, Export = 0 |
 | Feature set | `import_export_esm_window_only_supcon_ce_import_pos` - ESM-2 local window (21) with PLS-reduced window embeddings |
 | Model | `supcon_ce` with supervised contrastive loss and cross-entropy loss |
 | Window size | 21 |
@@ -44,17 +44,17 @@ Important options:
 | `--save_dropped_csv` | Save rows dropped during preprocessing |
 | `--use_platt` / `--no-use_platt` | Enable or disable Platt calibration when the calibrator exists |
 
-Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_export`, `std_prob_export`, `threshold`, `positive_class`, `pred_label`, `pred_direction`, `feature_set`, and `model_name`. The script also writes:
+Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_export`, `std_prob_export`, `threshold`, `positive_class`, `pred_label`, `pred_direction`, `feature_set`, and `model_name`. In these legacy column names, `import` corresponds to nuclear accumulation and `export` corresponds to cytoplasmic redistribution. The script also writes:
 
 | Output | Description |
 |--------|-------------|
-| `*_per_fold.csv` | Wide table of fold-level import/export probabilities |
+| `*_per_fold.csv` | Wide table of fold-level direction probabilities |
 | `*_run_meta.json` | Input paths, feature set, calibration status, threshold, and preprocessing counts |
 | dropped-row CSV | Optional table containing sites removed for missing sequence, invalid position, non-STY residue, or missing ESM embedding |
 
 ## Joint score and stable predictions
 
-`scripts/calculate_joint_direction_score.py` combines Stage 1 functional ensemble scores with Stage 2 import/export predictions. The stable prediction files used by feature-panel plots and the CPTAC analysis are stored under:
+`scripts/calculate_joint_direction_score.py` combines Stage 1 functional ensemble scores with direction predictions. The stable prediction files used by feature-panel plots and the CPTAC validation are stored under:
 
 ```text
 data/precomputed/1_transport_classifier_results/joint_score/
@@ -78,7 +78,7 @@ python scripts/run_import_export_experiment.py \
 | File | Description |
 |------|-------------|
 | `configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml` | Experiment entry point: data paths, linked config files, and runtime settings (`device`, `output_dir`) |
-| `configs/split.yaml` | 5-fold stratified group cross-validation on annotated import/export positives |
+| `configs/split.yaml` | 5-fold stratified group cross-validation on annotated direction-labeled transport-positive sites |
 | `configs/train_supcon_ce_window_only.yaml` | `supcon_ce` architecture, SupCon+CE optimization, and training settings |
 | `configs/feature_sets_esm_window_only_supcon_ce.yaml` | Feature block definitions used by `import_export_esm_window_only_supcon_ce_import_pos`: ESM-2 window embeddings with PLS reduction |
 | `configs/runs/esm_window_only_supcon_ce_import_pos_run_meta.json` | Snapshot of metrics, fold selection, and paths from the finalized run |
@@ -114,7 +114,7 @@ results/1_transport_classifier_results/esm_window_only_import_pos_predictions/
 ## Notes and limitations
 
 - This model assumes the input sites are plausible transport-regulatory candidates.
-- The reference positive class is import; if a future run uses export as the positive class, interpret `mean_prob_positive` through the `positive_class` column.
+- The reference positive class is the legacy import label, corresponding to nuclear accumulation; if a future run uses the legacy export label as the positive class, interpret `mean_prob_positive` through the `positive_class` column.
 - Platt-calibrated probabilities are used when the saved calibrator is available and `--use_platt` is enabled.
 
 ## Related documentation

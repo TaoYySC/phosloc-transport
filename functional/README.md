@@ -2,7 +2,7 @@
 
 Stage 1 training and inference pipeline for the PhosLoc-Transport repository.
 
-This subproject trains a binary classifier that predicts whether a transcription factor phosphosite is likely to have **functional nuclear transport regulatory activity**, compared with background phosphosites. It does **not** predict import versus export direction; direction classification is handled by the [`import_export/`](../import_export/) subproject.
+This subproject trains a binary classifier that predicts whether a transcription factor phosphosite is likely to have **functional nuclear transport regulatory activity**, compared with background phosphosites. It does **not** predict nuclear accumulation versus cytoplasmic redistribution direction; direction classification is handled by the [`import_export/`](../import_export/) subproject.
 
 ## Finalized model
 
@@ -97,7 +97,7 @@ results/2_1_functional_classifier_results/predictions/
 
 - The positive class is a functional nuclear-transport regulatory phosphosite.
 - The model was developed for transcription-factor phosphosites and expects matching sequence, embedding, and structure resources.
-- Use Stage 2 (`../import_export/`) to classify import versus export after identifying transport-positive candidate sites.
+- Use the direction classifier (`../import_export/`) to classify nuclear accumulation versus cytoplasmic redistribution after identifying transport-positive candidate sites.
 
 ## Related documentation
 

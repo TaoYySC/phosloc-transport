@@ -1,4 +1,4 @@
-# Import/Export subproject - data
+# Direction-classifier subproject - data
 
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
@@ -6,7 +6,7 @@ Public data-download links are intentionally left blank while the data upload is
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Import/export data bundle | `import_export/data/` | TBD |
+| Direction-classifier data bundle | `import_export/data/` | TBD |
 | Shared functional data bundle | `functional/data/` | TBD |
 
 ## Directory summary
@@ -14,7 +14,7 @@ Public data-download links are intentionally left blank while the data upload is
 | Path | Purpose |
 |------|---------|
 | `cluster/` | Training CD-HIT clusters |
-| `dataset_phos_site/` | Import/export positive sites |
+| `dataset_phos_site/` | Direction-labeled transport-positive sites |
 | `fasta/` | TF FASTA sequences (copy of `functional/data/fasta`) |
 | `TF_esm_embedding/` | ESM-2 embeddings (copy of `functional/data/TF_esm_embedding`) |
 | `model_artifacts/` | Finalized IE fold artifacts + Platt calibrator (inference) |
@@ -22,7 +22,7 @@ Public data-download links are intentionally left blank while the data upload is
 
 Negatives, functional ensemble predictions, and manual features are loaded from `../functional/data/`.
 
-When uploading **only** the import/export data bundle, include local `fasta/` and `TF_esm_embedding/` (populated by `scripts/populate_data.sh` from `functional/data/`).
+When uploading **only** the direction-classifier data bundle, include local `fasta/` and `TF_esm_embedding/` (populated by `scripts/populate_data.sh` from `functional/data/`).
 
 ## Prediction input
 
