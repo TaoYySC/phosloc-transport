@@ -1,0 +1,19 @@
+# Python 3.10.x (tested on 3.10.13); see README.md
+#
+# Core scientific stack
+numpy==2.0.2
+pandas==2.2.2
+scipy==1.13.1
+scikit-learn==1.6.1
+matplotlib==3.9.4
+seaborn==0.13.2
+PyYAML==6.0.2
+joblib==1.4.2
+tqdm==4.67.1
+
+# ML models
+xgboost==2.1.4
+torch==2.6.0
+torch-geometric==2.6.1
+
+# Optional extras: see requirements-optional.txt

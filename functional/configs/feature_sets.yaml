@@ -1,0 +1,69 @@
+# feature_sets:
+#   # tabular_basic:
+#   #   families:
+#   #     - charge
+#   #     - sequence
+#   #     - zscale
+#   #     - hotspot
+#   #     - kinase
+#   #     - evolution
+#   #     - alphamissense
+#   #     - nls
+#   #     - nes
+#   #     - motif1433
+#   #     - idr
+#   #     - domain
+#   #   use_seq_cnn: false
+#   #   missing_rate_threshold: 0.5
+
+#   tabular_plus_seqcnn:
+#     families:
+#       - charge
+#       - sequence
+#       - zscale
+#       - hotspot
+#       - kinase
+#       - evolution
+#       - alphamissense
+#       - nls
+#       - nes
+#       - motif1433
+#       - idr
+#       - domain
+#     use_seq_cnn: true
+#     missing_rate_threshold: 0.5
+#     seq_window_size: 31
+#     seq_input_dim: 21
+#     seq_conv_channels: [16, 32]
+#     seq_kernel_size: 3
+#     seq_output_dim: 16
+
+# feature_sets:
+#   onehot_only:
+#     blocks:
+#       onehot:
+#         type: onehot_window
+#         seq_col: FULL_SEQUENCE
+#         pos_col: POSITION
+#         window_size: 31
+
+# 
+
+feature_sets:
+  esm_graph:
+    blocks:
+      esm:
+        type: esm_window
+        acc_col: ACC_ID
+        pos_col: POSITION
+        window_size: 31
+        embedding_dim: 1280
+        embedding_dir: data/TF_esm_embedding
+      af_graph:
+        type: alphafold_graph
+        acc_col: ACC_ID
+        pos_col: POSITION
+        pdb_dir: data/alphafold_tf_pdb
+        radius: 12.0
+        max_nodes: 64
+        use_plddt: true

@@ -1,0 +1,14 @@
+selected_model: supcon_ce
+models:
+  supcon_ce:
+    backend: sklearn
+    input_keys: [esm_window]
+    threshold: 0.5
+    C: 0.03
+    alpha: 1.0
+    temperature: 0.05
+    embed_dim: 64
+    lr: 0.05
+    max_iter: 5000
+    tol: 1.0e-5
+    class_weight: balanced

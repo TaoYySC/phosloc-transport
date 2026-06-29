@@ -1,0 +1,247 @@
+# pos_weight: 10.0
+
+
+# lr: 0.001
+# weight_decay: 0.005
+# batch_size: 8
+# num_epochs: 50
+# dropout: 0.2
+
+# tabular_hidden_dims: [32, 16]
+# tabular_output_dim: 32
+# fusion_hidden_dims: [32, 16]
+
+# early_stopping: true
+# early_stopping_metric: val_auroc
+# early_stopping_patience: 8
+# early_stopping_min_delta: 0.0005
+
+
+# lr: 0.001
+# weight_decay: 0.0001
+# batch_size: 32
+# num_epochs: 3
+# dropout: 0.2
+
+# tabular_hidden_dims: [128, 64]
+# tabular_output_dim: 32
+# fusion_hidden_dims: [64, 32]
+
+
+# only one hot and esm embeddig
+# selected_model: onehot_cnn
+
+# models:
+#   onehot_cnn:
+#     model_type: torch
+#     class_name: OneHotCNNClassifier
+#     input_keys: [onehot]
+#     input_dim: 21
+#     conv_channels: [512, 512]
+#     kernel_size: 3
+#     encoder_output_dim: 256
+#     hidden_dim: 128
+#     dropout: 0.2
+#     lr: 0.0001
+#     weight_decay: 0.0005
+#     batch_size: 16
+#     num_epochs: 50
+
+
+# selected_model: onehot_cnn2d
+
+# models:
+#   onehot_cnn2d:
+#     input_keys: [onehot]
+#     input_dim: 21
+#     conv_channels: [256, 128]
+#     seq_kernel_size: 3
+#     encoder_output_dim: 64
+#     hidden_dim: 32
+#     dropout: 0.2
+#     lr: 0.001
+#     weight_decay: 0.001
+#     batch_size: 32
+#     num_epochs: 80
+#     pos_weight: auto
+#     early_stopping: true
+#     early_stopping_metric: val_auprc
+#     early_stopping_patience: 12
+#     early_stopping_min_delta: 0.0
+
+
+# selected_model: esm_cnn
+
+# models:
+#   esm_cnn:
+#     input_keys: [esm]
+#     input_dim: 1280
+#     conv_channels: [32, 16]
+#     kernel_size: 3
+#     encoder_output_dim: 16
+#     hidden_dim: 16
+#     dropout: 0.3
+#     lr: 0.0005
+#     weight_decay: 0.0001
+#     batch_size: 8
+#     num_epochs: 50
+#     early_stopping: true
+#     early_stopping_metric: val_auprc
+#     early_stopping_patience: 12
+#     early_stopping_min_delta: 0.0
+
+
+# selected_model: esm_cnn2d
+
+# models:
+#   esm_cnn2d:
+#     input_keys: [esm]
+#     input_dim: 1280
+#     proj_input_dim: 512
+#     conv_channels: [256, 128]
+#     seq_kernel_size: 3
+#     encoder_output_dim: 64
+#     hidden_dim: 32
+#     dropout: 0.3
+#     lr: 0.001
+#     weight_decay: 0.001
+#     batch_size: 32
+#     num_epochs: 80
+#     pos_weight: auto
+#     early_stopping: true
+#     early_stopping_metric: val_auprc
+#     early_stopping_patience: 12
+#     early_stopping_min_delta: 0.0
+
+
+
+# selected_model: esm_cnn2d_site
+
+# models:
+#   esm_cnn2d_site:
+#     input_keys: [esm]
+#     input_dim: 1280
+#     proj_input_dim: 512
+#     conv_channels: [256, 128]
+#     seq_kernel_size: 3
+#     encoder_output_dim: 64
+#     site_hidden_dims: [512, 256]
+#     site_output_dim: 64
+#     fusion_hidden_dim: 32
+#     dropout: 0.3
+#     lr: 0.001
+#     weight_decay: 0.001
+#     batch_size: 32
+#     num_epochs: 80
+#     pos_weight: auto
+#     early_stopping: true
+#     early_stopping_metric: val_auprc
+#     early_stopping_patience: 12
+#     early_stopping_min_delta: 0.0
+
+
+# origin model param
+# selected_model: esm_cnn2d_site_gnn
+
+# models:
+#   esm_cnn2d_site_gnn:
+#     input_keys: [esm, af_graph]
+
+#     input_dim: 1280
+#     proj_input_dim: 512
+#     conv_channels: [256, 128]
+#     seq_kernel_size: 3
+#     encoder_output_dim: 64
+
+#     site_hidden_dims: [512, 256]
+#     site_output_dim: 64
+
+#     gnn_node_input_dim: 23
+#     gnn_hidden_dim: 64
+#     gnn_output_dim: 64
+
+#     fusion_hidden_dims: [64, 32]
+
+#     dropout: 0.3
+#     lr: 0.001
+#     weight_decay: 0.001
+#     batch_size: 32
+#     num_epochs: 80
+#     pos_weight: auto
+#     early_stopping: true
+#     early_stopping_metric: val_auroc
+#     early_stopping_patience: 12
+#     early_stopping_min_delta: 0.0
+
+# smaller model
+# selected_model: esm_cnn2d_site_gnn
+
+# models:
+#   esm_cnn2d_site_gnn:
+#     input_keys: [esm, af_graph]
+
+#     input_dim: 1280
+#     proj_input_dim: 64
+#     conv_channels: [64, 32]
+#     seq_kernel_size: 3
+#     encoder_output_dim: 48
+
+#     site_hidden_dims: [96, 48]
+#     site_output_dim: 48
+
+#     gnn_node_input_dim: 23
+#     gnn_hidden_dim: 16
+#     gnn_output_dim: 48
+#     gnn_heads: 2
+
+#     fusion_hidden_dims: [48, 24]
+
+#     dropout: 0.5
+#     lr: 0.0003
+#     weight_decay: 0.005
+#     batch_size: 32
+#     num_epochs: 120
+#     pos_weight: auto
+#     early_stopping: true
+#     early_stopping_metric: val_auroc
+#     early_stopping_patience: 10
+#     early_stopping_min_delta: 0.001
+
+
+# large regularization
+selected_model: esm_cnn2d_site_gnn
+
+models:
+  esm_cnn2d_site_gnn:
+    input_keys: [esm, af_graph]
+
+    input_dim: 1280
+    proj_input_dim: 512
+    conv_channels: [256, 128]
+    seq_kernel_size: 3
+    encoder_output_dim: 64
+
+    site_hidden_dims: [512, 256]
+    site_output_dim: 64
+
+    gnn_node_input_dim: 23
+    gnn_hidden_dim: 64
+    gnn_output_dim: 64
+    gnn_heads: 4
+
+    fusion_hidden_dims: [64, 32]
+
+    dropout: 0.05
+    lr: 0.0002
+    weight_decay: 0.001
+    batch_size: 32
+    num_epochs: 80
+    loss_type: bce
+    pos_weight: auto
+    early_stopping: true
+    early_stopping_metric: val_auprc
+    early_stopping_patience: 10
+    early_stopping_min_delta: 0.0
+    val_eval_interval: 2
+    save_train_predictions: false
+

@@ -1,0 +1,15 @@
+data:
+  positive_csv: data/dataset_phos_site/TF_positive_phos_site_0608.csv
+  fasta_path: data/fasta/transcription_fasta.fasta
+  cluster_csv: data/cluster/ie_train_window21_c70_cluster.csv
+  positive_class: import
+
+configs:
+  split_cfg: configs/split.yaml
+  feature_sets_cfg: configs/feature_sets_esm_window_only_supcon_ce.yaml
+  train_cfg: configs/train_supcon_ce_window_only.yaml
+
+runtime:
+  device: cuda
+  output_dir: results
+  save_fold_artifacts: true

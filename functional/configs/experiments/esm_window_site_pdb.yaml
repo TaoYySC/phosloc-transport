@@ -1,0 +1,19 @@
+task: Functional Transport
+
+data:
+  positive_csv: data/dataset_phos_site/TF_positive_phos_site_0608.csv
+  negative_csv: data/dataset_phos_site/TF_deepmvp_negative_phos_site_tf_only.csv
+  fasta_path: data/fasta/transcription_fasta.fasta
+  # cluster_csv: data/cluster/tf_phos_site_window31_c08_cluster.csv
+  # cluster_csv: data/cluster/tf_phos_site_window31_c70_cluster.csv
+  cluster_csv: data/cluster/func_train_window31_c70_cluster.csv
+  negative_min_distance: 30
+
+configs:
+  split_cfg: configs/split.yaml
+  feature_sets_cfg: configs/feature_sets.yaml
+  train_cfg: configs/train.yaml
+
+runtime:
+  device: cuda
+  output_dir: results

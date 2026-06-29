@@ -1,0 +1,21 @@
+# ESM Window only: PLS-64 + SupCon+CE (reproduce quad ablation window-only baseline).
+
+feature_sets:
+  esm_window_only_supcon_ce:
+    input_keys: [esm_window]
+    blocks:
+      esm_window:
+        type: esm_window_site_pca
+        embedding_dir: data/TF_esm_embedding
+        acc_col: ACC_ID
+        pos_col: POSITION
+        window_size: 21
+        embedding_dim: 1280
+        window_pooling: mean
+        use_window_embedding: true
+        use_site_embedding: false
+        reducer: pls
+        separate_reduction_per_embedding: true
+        pls_components_window: 64
+        standardize_before_reduction: true
+        fill_missing: false

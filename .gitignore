@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+*.ipynb_checkpoints/
+
+# Runtime outputs
+**/results/
+**/logs/
+*.log
+nohup.out
+
+# Large data (ship separately — see DATA.md)
+**/data/TF_esm_embedding/
+**/data/alphafold_tf_pdb/
+**/data/features/
+**/data/fasta/
+**/data/model_artifacts/
+**/data/precomputed/
+**/*.pdb
+**/*.pt
+**/*.pth
+**/*.ckpt
+**/*.npy
+**/*.npz
+**/*.h5
+**/*.pkl
+**/*.joblib
+
+# CPTAC analysis (large external omics bundle — see cptac_analysis/data/README.md)
+cptac_analysis/data/source/
+cptac_analysis/results/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

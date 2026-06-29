@@ -1,0 +1,15 @@
+seed: 42
+n_splits: 5
+
+fixed_test_size: 0.2
+fixed_test_seed: 42
+
+selection_metric: val_auroc
+
+acc_col: ACC_ID
+site_col: POSITION
+group_col: Cluster_ID
+cluster_key_col: INDEX
+
+label_col: LABEL
+stratify: true

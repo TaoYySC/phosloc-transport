@@ -1,0 +1,24 @@
+{
+  "task_name": "Import vs Export",
+  "n_rows": 124,
+  "group_col": "Cluster_ID",
+  "label_col": "LABEL",
+  "seeds": [
+    42
+  ],
+  "n_splits": 5,
+  "stratify_group_kfold": true,
+  "feature_sets": [
+    "esm_window_only_supcon_ce"
+  ],
+  "selected_model": "supcon_ce",
+  "validation_used": false,
+  "fold_artifacts_saved": true,
+  "window_size": 21,
+  "cluster_csv": "data/cluster/ie_train_window21_c70_cluster.csv",
+  "cluster_window_size": null,
+  "output_tag": "esm_window_only_supcon_ce_import_pos",
+  "feature_set": "esm_window_only_supcon_ce",
+  "positive_class": "import",
+  "mode": "quad_concat"
+}
