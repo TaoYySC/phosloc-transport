@@ -37,15 +37,6 @@ copy_tree() {
   rsync -a "$src/" "$dest/"
 }
 
-link_rel() {
-  local target="$1"
-  local link="$2"
-  rm -f "$link"
-  mkdir -p "$(dirname "$link")"
-  ln -sfn "$target" "$link"
-  echo "[link] $link -> $target"
-}
-
 echo "=== Repo: $REPO ==="
 
 echo "=== functional/data: large assets ==="
@@ -89,9 +80,9 @@ for run in \
   done
 done
 
-echo "=== import_export/data: shared assets (relative links to functional) ==="
-link_rel "../../functional/data/fasta" "$IE/data/fasta"
-link_rel "../../functional/data/TF_esm_embedding" "$IE/data/TF_esm_embedding"
+echo "=== import_export/data: shared assets (copies from functional) ==="
+copy_tree "$FUNC/data/fasta" "$IE/data/fasta"
+copy_tree "$FUNC/data/TF_esm_embedding" "$IE/data/TF_esm_embedding"
 
 echo "=== import_export/data: model artifacts (inference) ==="
 IE_RUN_SRC="$IE_SRC/results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export"
@@ -128,13 +119,12 @@ for f in metrics_all_runs.csv all_fold_test_predictions_platt.csv all_fold_test_
   fi
 done
 
-echo "=== cptac_analysis/data: CPTAC source symlink ==="
-mkdir -p "$CPTAC/data"
+echo "=== cptac_analysis/data: CPTAC source copy ==="
 if [[ -d "$CPTAC_SRC" ]]; then
-  link_rel "$CPTAC_SRC" "$CPTAC/data/source"
+  copy_tree "$CPTAC_SRC" "$CPTAC/data/source"
 else
   echo "[warn] CPTAC source not found: $CPTAC_SRC" >&2
-  echo "[warn] Symlink CPTAC data manually — see cptac_analysis/data/README.md" >&2
+  echo "[warn] Copy CPTAC data manually — see cptac_analysis/data/README.md" >&2
 fi
 
 echo "=== cleanup legacy paths ==="

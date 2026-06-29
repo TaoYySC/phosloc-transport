@@ -87,7 +87,7 @@ Shared negatives, functional ensemble predictions, and feature tables are read f
 
 ```
 cptac_analysis/data/
-└── source/                                        # CPTAC / ChIP / regulon bundle (symlink)
+└── source/                                        # CPTAC / ChIP / regulon bundle (local copy)
     ├── 1.cpatac/LinkedOmicsKB/
     ├── 3.idmapping/HUMAN_9606_idmapping.dat
     ├── 4.chipaltas/1.target_genes/targets_5kb/
@@ -121,4 +121,4 @@ bash scripts/populate_data.sh
 
 Environment overrides: `REPO`, `FUNC_SRC`, `IE_SRC`, `TF_SRC`, `CPTAC_SRC` (see script header).
 
-This rsyncs large assets, refreshes `precomputed/` and `model_artifacts/` for Stages 1–2, and symlinks `cptac_analysis/data/source/` when `CPTAC_SRC` is available.
+This rsyncs large assets, refreshes `precomputed/` and `model_artifacts/` for Stages 1–2, and copies `cptac_analysis/data/source/` when `CPTAC_SRC` is available.

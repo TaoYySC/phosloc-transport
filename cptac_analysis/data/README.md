@@ -1,27 +1,27 @@
 # CPTAC analysis — data
 
-Large CPTAC and reference files are **not** tracked in Git. You must prepare or symlink them under `cptac_analysis/data/` before running Stage 3.
+Large CPTAC and reference files are **not** tracked in Git. Copy them under `cptac_analysis/data/` before running Stage 3.
 
 ## Required setup
 
-1. Create `cptac_analysis/data/source/` pointing at the CPTAC / ChIP / regulon bundle (~3.9 GB).  
+1. Populate `cptac_analysis/data/source/` with the CPTAC / ChIP / regulon bundle (~3.9 GB).  
    If you have the legacy `phosloc-TF` tree locally, run from the repo root:
 
    ```bash
    bash scripts/populate_data.sh
    ```
 
-   Or link manually:
+   Or copy manually:
 
    ```bash
-   ln -sfn /path/to/cptac_source cptac_analysis/data/source
+   rsync -a /path/to/cptac_source/ cptac_analysis/data/source/
    ```
 
 2. Ensure Stages 1–2 inputs are present under `functional/data/` and `import_export/data/precomputed/` (stable import predictions and known positive site labels).
 
 3. Install `pyensembl` and download the Ensembl release cache before running the integrated pipeline (see [cptac_analysis/README.md](../README.md)).
 
-Without a valid `data/source/` symlink or copy, the integrated pipeline cannot access CPTAC phosphoproteomics, proteomics, or RNA-seq matrices.
+Without `data/source/` in place, the integrated pipeline cannot access CPTAC phosphoproteomics, proteomics, or RNA-seq matrices.
 
 ## Directory summary
 
@@ -49,6 +49,6 @@ The integrated pipeline also reads PhosLoc-Transport classifier outputs from the
 | `../../import_export/data/precomputed/1_transport_classifier_results/joint_score/` | Stable import/export site predictions |
 | `../../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv` | Known positive phosphosite labels |
 
-If the default symlink for `source/` is missing, pass `--linkedomics-base`, `--chip-dir`, and related CLI flags in `run_import_target_regulation_analysis.py` to your local copies.
+If `source/` is missing, pass `--linkedomics-base`, `--chip-dir`, and related CLI flags in `run_import_target_regulation_analysis.py` to your local copies.
 
 Full inventory: **[../../DATA.md](../../DATA.md)**
