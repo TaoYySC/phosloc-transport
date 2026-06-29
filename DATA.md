@@ -11,9 +11,8 @@ Upload the **code repo** and **data directories** separately if needed:
 | Functional data | `functional/data/` | ~7.0 GB | TBD |
 | Import/Export data | `import_export/data/` (+ resolves shared links into `functional/data/`) | ~1.0 GB unique + shared | TBD |
 | CPTAC source bundle | `cptac_analysis/data/source/` | ~3.9 GB | TBD |
-| CPTAC reference outputs | `cptac_analysis/results/` (optional) | ~120 MB | TBD |
 
-Public data-download links are intentionally left blank while the data upload is in progress.
+Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
 
 ## `functional/data/`
 
@@ -90,9 +89,9 @@ cptac_analysis/data/
     `-- 5.regulons/CollecTRI_regulons.csv
 ```
 
-Stage 3 also reads stable import predictions and known positive labels from `import_export/data/precomputed/` and `functional/data/` (see [cptac_analysis/data/README.md](cptac_analysis/data/README.md)).
+CPTAC validation also reads stable import predictions and known positive labels from `import_export/data/precomputed/` and `functional/data/` (see [cptac_analysis/data/README.md](cptac_analysis/data/README.md)).
 
-## `results/` (runtime outputs, optional in data bundle)
+## `results/` (runtime outputs, not included in the Zenodo data bundle)
 
 | Path | Produced by |
 |------|-------------|
@@ -113,4 +112,4 @@ bash scripts/populate_data.sh
 
 Environment overrides: `REPO`, `FUNC_SRC`, `IE_SRC`, `TF_SRC`, `CPTAC_SRC` (see script header).
 
-This rsyncs large assets, refreshes `precomputed/` and `model_artifacts/` for Stages 1-2, and copies `cptac_analysis/data/source/` when `CPTAC_SRC` is available.
+This rsyncs large assets, refreshes `precomputed/` and `model_artifacts/` for the two classifier modules, and copies `cptac_analysis/data/source/` when `CPTAC_SRC` is available.

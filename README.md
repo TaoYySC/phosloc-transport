@@ -2,19 +2,19 @@
 
 Machine-learning pipelines for transcription-factor phosphosite nuclear transport prediction.
 
-This monorepo contains **three analysis stages**:
+This monorepo contains **three analysis modules**:
 
 | Subproject | Task |
 |------------|------|
 | [`functional/`](functional/) | Functional transport phosphosite classification |
 | [`import_export/`](import_export/) | Import vs. export direction classification |
-| [`cptac_analysis/`](cptac_analysis/) | CPTAC multi-omics target-regulation analysis |
+| [`cptac_analysis/`](cptac_analysis/) | CPTAC validation of predicted import-associated phosphosites |
 
 Typical workflow:
 
-1. Use Stage 1 to score whether a TF phosphosite is likely to regulate nuclear transport.
-2. Use Stage 2 on transport-positive candidate sites to classify import versus export direction.
-3. Use Stage 3 to evaluate predicted import-associated sites against CPTAC tumor multi-omics target-gene regulation.
+1. Use the functional transport classifier to score whether a TF phosphosite is likely to regulate nuclear transport.
+2. Use the import/export classifier on transport-positive candidate sites to classify import versus export direction.
+3. Use CPTAC validation to evaluate predicted import-associated sites against tumor multi-omics target-gene regulation.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Typical workflow:
 - **Core dependencies** ([`requirements.txt`](requirements.txt)): `numpy==2.0.2`, `pandas==2.2.2`, `scipy==1.13.1`, `scikit-learn==1.6.1`, `matplotlib==3.9.4`, `seaborn==0.13.2`, `PyYAML==6.0.2`, `joblib==1.4.2`, `tqdm==4.67.1`, `xgboost==2.1.4`, `torch==2.6.0`, `torch-geometric==2.6.1` (GPU training validated with `torch==2.6.0+cu124`, CUDA 12.4)
 - **GPU** acceleration is recommended for ESM embedding extraction and AlphaFold graph-based model training
 
-**Optional** ([`requirements-optional.txt`](requirements-optional.txt)): `fair-esm==2.0.1`, `umap-learn==0.5.7`, `pyensembl` (Stage 3 CPTAC analysis). Optional packages are not needed to reproduce finalized runs if all precomputed features are provided.
+**Optional** ([`requirements-optional.txt`](requirements-optional.txt)): `fair-esm==2.0.1`, `umap-learn==0.5.7`, `pyensembl` (CPTAC validation). Optional packages are not needed to reproduce finalized runs if all precomputed features are provided.
 
 ## Quick start
 
@@ -101,7 +101,7 @@ python scripts/run_import_export_experiment.py \
   --output_tag esm_window_only_supcon_ce_import_pos
 ```
 
-### Run CPTAC target-regulation analysis (Stage 3)
+### Run CPTAC validation
 
 See **[cptac_analysis/README.md](cptac_analysis/README.md)** for data setup (`cptac_analysis/data/source/`), `pyensembl`, and analysis commands.
 
@@ -115,14 +115,13 @@ Large feature files, model artifacts, CPTAC source files, and intermediate data 
 
 Full inventory and upload notes: **[DATA.md](DATA.md)**.
 
-Public data-download links are intentionally left blank while the data upload is in progress.
+Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
 
 | Data bundle | Target path | Download / DOI |
 |-------------|-------------|----------------|
 | Functional training, prediction, and plotting data | `functional/data/` | TBD |
 | Import/export training, prediction, and plotting data | `import_export/data/` | TBD |
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
-| Optional CPTAC reference outputs | `cptac_analysis/results/` | TBD |
 
 Reproducing the finalized runs requires processed feature files, training splits, model configs, and run metadata snapshots bundled under each subproject's `data/` and `configs/` trees. Without the data bundles, the repository can be inspected but training, prediction, plotting, and CPTAC analysis will not run end to end.
 
@@ -161,7 +160,7 @@ The finalized training runs are recorded below.
 |----------|--------------|
 | Functional transport | `run_20260610_204935_ESM Window+Site+PDB` |
 | Import/export direction | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
-| CPTAC target-regulation analysis | `results/import_target_regulation/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
+| CPTAC validation | `results/import_target_regulation/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.
 
@@ -174,14 +173,14 @@ Run metadata snapshots for Stages 1-2 are stored under each subproject's `config
 | [DATA.md](DATA.md) | Train / plot / predict data layout |
 | [functional/README.md](functional/README.md) | Functional pipeline overview |
 | [import_export/README.md](import_export/README.md) | Import/export pipeline overview |
-| [cptac_analysis/README.md](cptac_analysis/README.md) | CPTAC cancer analysis overview |
+| [cptac_analysis/README.md](cptac_analysis/README.md) | CPTAC validation overview |
 
 ## Troubleshooting
 
 - Use `--device cpu` on machines without a CUDA-capable GPU.
 - Check that `ACC_ID` values match the FASTA, ESM embedding filenames, and AlphaFold/PDB files.
 - For Stage 1 prediction, use `--skip_pdb_position_filter` only when you intentionally want to bypass the PDB-position availability check.
-- For Stage 3, install `pyensembl` and prepare the Ensembl release cache before running the integrated CPTAC pipeline.
+- For CPTAC validation, install `pyensembl` and prepare the Ensembl release cache before running the integrated CPTAC pipeline.
 - Paths in config files are relative to each subproject root unless stated otherwise.
 
 ## Citation

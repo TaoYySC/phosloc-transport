@@ -1,6 +1,6 @@
-# CPTAC cancer analysis
+# CPTAC validation
 
-Stage 3 analysis pipeline for the PhosLoc-Transport repository.
+CPTAC validation module for the PhosLoc-Transport repository.
 
 This subproject links stable PhosLoc-Transport **import** predictions to CPTAC matched tumor multi-omics data and evaluates whether high phosphorylation of predicted import-associated phosphosites is associated with directionally consistent **signed TF target-gene expression** across cancer types.
 
@@ -28,7 +28,7 @@ The default analysis uses:
 
 | Component | Default behavior |
 |-----------|------------------|
-| Site set | Stable predicted import sites from Stage 2 joint-score outputs |
+| Site set | Stable predicted import sites from import/export joint-score outputs |
 | Phospho split | `median_nonmissing` split on site phosphoproteomics abundance |
 | Target sets | Signed TF target genes from curated regulons, optionally intersected with ChIP-derived target support |
 | Directional test | High-phospho versus low-phospho target expression in the expected signed direction |
@@ -62,13 +62,13 @@ Large CPTAC and reference files are **not** tracked in Git. Prepare or symlink i
 
 See [`data/README.md`](data/README.md) for the expected directory layout.
 
-Public download links are intentionally left blank while the data upload is in progress.
+Public download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
 
 | Input bundle | Target path | Download / DOI |
 |--------------|-------------|----------------|
+| Functional data bundle | `../functional/data/` | TBD |
+| Import/export data bundle | `../import_export/data/` | TBD |
 | CPTAC / ChIP / regulon source bundle | `data/source/` | TBD |
-| Stable PhosLoc-Transport prediction bundle | `../import_export/data/precomputed/` | TBD |
-| Functional labels and shared feature bundle | `../functional/data/` | TBD |
 
 ## Run integrated pipeline
 
@@ -155,14 +155,14 @@ The analysis expects local copies of third-party resources. Record exact version
 | CollecTRI regulons | Signed activate/repress TF-target relationships |
 | UniProt idmapping | Gene/protein identifier mapping |
 | Ensembl / pyensembl | Gene annotation |
-| PhosLoc-Transport Stage 1-2 outputs | Stable predicted import sites and known positive labels |
+| PhosLoc-Transport classifier outputs | Stable predicted import sites and known positive labels |
 
 ## Related documentation
 
 | Resource | Description |
 |----------|-------------|
 | [data/README.md](data/README.md) | CPTAC and reference data layout |
-| [../docs/FIGURES_AND_PREDICTION.md](../docs/FIGURES_AND_PREDICTION.md) | Figure and prediction scripts for Stages 1-3 |
-| [../docs/TRAINING_RUNS.md](../docs/TRAINING_RUNS.md) | Finalized model training details for Stages 1-3 |
+| [../docs/FIGURES_AND_PREDICTION.md](../docs/FIGURES_AND_PREDICTION.md) | Figure, prediction, and CPTAC validation scripts |
+| [../docs/TRAINING_RUNS.md](../docs/TRAINING_RUNS.md) | Finalized classifier training and CPTAC validation details |
 | [../import_export/data/precomputed/1_transport_classifier_results/joint_score/](../import_export/data/precomputed/1_transport_classifier_results/joint_score/) | Stable import/export predictions used as pipeline input |
 | [../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv](../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv) | Known positive phosphosite labels |

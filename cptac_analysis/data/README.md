@@ -1,14 +1,14 @@
 # CPTAC analysis - data
 
-Large CPTAC and reference files are **not** tracked in Git. Copy them under `cptac_analysis/data/` before running Stage 3.
+Large CPTAC and reference files are **not** tracked in Git. Copy them under `cptac_analysis/data/` before running CPTAC validation.
 
-Public data-download links are intentionally left blank while the data upload is in progress.
+Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
-| Stable PhosLoc-Transport predictions | `import_export/data/precomputed/` | TBD |
-| Functional labels and shared data | `functional/data/` | TBD |
+| Functional data bundle | `functional/data/` | TBD |
+| Import/export data bundle | `import_export/data/` | TBD |
 
 ## Required setup
 
@@ -25,7 +25,7 @@ Public data-download links are intentionally left blank while the data upload is
    rsync -a /path/to/cptac_source/ cptac_analysis/data/source/
    ```
 
-2. Ensure Stages 1-2 inputs are present under `functional/data/` and `import_export/data/precomputed/` (stable import predictions and known positive site labels).
+2. Ensure classifier inputs are present under `functional/data/` and `import_export/data/precomputed/` (stable import predictions and known positive site labels).
 
 3. Install `pyensembl` and download the Ensembl release cache before running the integrated pipeline (see [cptac_analysis/README.md](../README.md)).
 
