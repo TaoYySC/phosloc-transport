@@ -1,6 +1,12 @@
-# Functional subproject — data
+# Functional subproject - data
 
-Full tree and upload notes: **[../../DATA.md](../../DATA.md)**
+Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
+
+Public data-download links are intentionally left blank while the data upload is in progress.
+
+| Bundle | Target path | Download / DOI |
+|--------|-------------|----------------|
+| Functional data bundle | `functional/data/` | TBD |
 
 ## Directory summary
 
@@ -17,6 +23,12 @@ Full tree and upload notes: **[../../DATA.md](../../DATA.md)**
 | `model_artifacts/` | Finalized functional model checkpoints (inference) |
 | `precomputed/` | Bundled CSV inputs for figure scripts |
 
-Training reads paths from `configs/experiments/esm_window_site_pdb.yaml`.  
-Plot scripts read from `data/precomputed/` and `data/features/`.  
+Training reads paths from `configs/experiments/esm_window_site_pdb.yaml`.
+Plot scripts read from `data/precomputed/` and `data/features/`.
 `predict_functional_transport.py` reads from `data/model_artifacts/`.
+
+## Prediction input
+
+The default prediction table is `dataset_phos_site/tf_all_phos_site_for_prediction.csv`.
+For custom prediction tables, provide `ACC_ID` and `POSITION`; `INDEX` is recommended.
+If `FULL_SEQUENCE` is absent, it is attached from `fasta/transcription_fasta.fasta`.

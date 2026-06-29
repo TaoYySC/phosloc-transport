@@ -1,6 +1,6 @@
 # Functional transport classifier
 
-Stage 1 training pipeline for the PhosLoc-Transport repository.
+Stage 1 training and inference pipeline for the PhosLoc-Transport repository.
 
 This subproject trains a binary classifier that predicts whether a transcription factor phosphosite is likely to have **functional nuclear transport regulatory activity**, compared with background phosphosites. It does **not** predict import versus export direction; direction classification is handled by the [`import_export/`](../import_export/) subproject.
 
@@ -9,11 +9,40 @@ This subproject trains a binary classifier that predicts whether a transcription
 | Field | Value |
 |-------|-------|
 | Task | Functional transport phosphosite classification |
-| Feature set | `esm_window_site_pdb` — ESM-2 local window (31), center-site ESM embedding, and AlphaFold local graph features |
+| Feature set | `esm_window_site_pdb` - ESM-2 local window (31), center-site ESM embedding, and AlphaFold local graph features |
 | Classifier | `esm_cnn2d_site_gnn` |
 | Window size | 31 |
 | Original run directory | `results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/` |
 | Run metadata | [`configs/runs/esm_window_site_pdb_run_meta.json`](configs/runs/esm_window_site_pdb_run_meta.json) |
+
+## Predict new sites
+
+The default prediction input is `data/dataset_phos_site/tf_all_phos_site_for_prediction.csv`. For custom inputs, provide at least `ACC_ID` and `POSITION`; `INDEX` is recommended as a stable site identifier. If `FULL_SEQUENCE` is absent, the script attaches sequences from `--fasta_path`.
+
+```bash
+cd functional
+export PYTHONPATH="${PWD}:${PYTHONPATH}"
+
+python scripts/predict_functional_transport.py \
+  --input_csv data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
+  --output_csv results/2_1_functional_classifier_results/predictions/custom_functional_predictions.csv \
+  --device cpu \
+  --with-threshold
+```
+
+Important options:
+
+| Option | Description |
+|--------|-------------|
+| `--artifact_root` | Directory containing saved fold artifacts and `model_checkpoint.pt` files |
+| `--input_csv` | Input phosphosite table |
+| `--output_csv` | Prediction CSV path |
+| `--fasta_path` | FASTA used when `FULL_SEQUENCE` is missing |
+| `--device` | Use `cuda` or `cpu` |
+| `--with-threshold` | Add `final_threshold` and `pred_label` columns |
+| `--skip_pdb_position_filter` | Skip filtering rows that lack the required AlphaFold/PDB residue position |
+
+Output columns include the original/transformed site columns, `prob_fold_*`, artifact metadata columns, `mean_prob`, `std_prob`, and optionally `final_threshold` and `pred_label`. Rows dropped by the PDB-position filter are written beside the output as `*_dropped_pdb_rows.csv`.
 
 ## Train
 
@@ -38,15 +67,37 @@ python scripts/1_1_run_experiment.py \
 
 ## Data
 
-Large feature files and intermediate inputs are **not** tracked in Git. Prepare or symlink the required files under `functional/data/` before training. See [`data/README.md`](data/README.md) for the expected directory layout.
+Large feature files, model artifacts, and intermediate inputs are **not** tracked in Git. Prepare or symlink the required files under `functional/data/` before training or prediction. See [`data/README.md`](data/README.md) and [`../DATA.md`](../DATA.md) for the expected directory layout.
+
+Required prediction resources:
+
+| Resource | Default path |
+|----------|--------------|
+| Input site CSV | `data/dataset_phos_site/tf_all_phos_site_for_prediction.csv` |
+| FASTA | `data/fasta/transcription_fasta.fasta` |
+| ESM embeddings | `data/TF_esm_embedding/` |
+| AlphaFold/PDB files | `data/alphafold_tf_pdb/` |
+| Model artifacts | `data/model_artifacts/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/artifacts/` |
 
 ## Outputs
 
 Training writes model checkpoints, validation metrics, test metrics, and run metadata to the configured results directory (default: `results/`). The finalized run is stored at:
 
-```
+```text
 results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/
 ```
+
+Prediction writes ensemble probability tables to:
+
+```text
+results/2_1_functional_classifier_results/predictions/
+```
+
+## Notes and limitations
+
+- The positive class is a functional nuclear-transport regulatory phosphosite.
+- The model was developed for transcription-factor phosphosites and expects matching sequence, embedding, and structure resources.
+- Use Stage 2 (`../import_export/`) to classify import versus export after identifying transport-positive candidate sites.
 
 ## Related documentation
 
