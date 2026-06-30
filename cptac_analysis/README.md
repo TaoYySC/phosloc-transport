@@ -63,13 +63,13 @@ Large CPTAC and reference files are **not** tracked in Git. Prepare or symlink i
 See [`data/README.md`](data/README.md) for the expected directory layout.
 
 The processed data bundles are available from the shared Zenodo record:
-[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
+[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
 
 | Input bundle | Target path | Download / DOI |
 |--------------|-------------|----------------|
-| Functional data bundle | `../functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
-| Localization Direction Classifier data bundle | `../import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
-| CPTAC / ChIP / regulon source bundle | `data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Functional data bundle | `../functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
+| Localization Direction Classifier data bundle | `../import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
+| CPTAC / ChIP / regulon source bundle | `data/source/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 
 ## Run integrated pipeline
 

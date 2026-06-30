@@ -3,11 +3,11 @@
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
 The processed data bundle is available from Zenodo:
-[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
+[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 
 ## Directory summary
 

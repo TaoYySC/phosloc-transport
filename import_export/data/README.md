@@ -3,12 +3,12 @@
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
 The processed data bundles are available from the shared Zenodo record:
-[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
+[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
-| Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
+| Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 
 ## Directory summary
 

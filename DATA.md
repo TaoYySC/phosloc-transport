@@ -5,12 +5,12 @@ Generated figures and new run outputs still go to `results/` (not shipped with t
 
 Upload the **code repo** and **data directories** separately if needed.
 All processed data bundles are available from one Zenodo record:
-[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
+[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
 
 | Upload unit | Path | Approx. size | Download / DOI |
 |-------------|------|--------------|----------------|
 | Code | repo root (exclude `**/data/` large dirs) | ~55 MB | GitHub repository |
-| Processed data bundles | `functional/data/`, `import_export/data/`, `cptac_analysis/data/source/` | See Zenodo record | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Processed data bundles | `functional/data/`, `import_export/data/`, `cptac_analysis/data/source/` | See Zenodo record | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 
 ## `functional/data/`
 
