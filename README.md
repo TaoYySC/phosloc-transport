@@ -2,7 +2,7 @@
 
 PhosLoc-Transport is a two-stage framework for prioritizing transcription factor phosphosites that may regulate nuclear transport. The Localization-Regulatory Classifier integrates local sequence, central phosphosite, and AlphaFold-derived structural features to identify candidate localization-regulatory sites; the Localization Direction Classifier predicts whether candidate sites are associated with nuclear accumulation or cytoplasmic redistribution.
 
-<img src="docs/assets/phosphorylation-dependent-tf-localization.png" alt="Phosphorylation-dependent control of TF localization" width="720">
+![Phosphorylation-dependent control of TF localization](docs/assets/phosphorylation-dependent-tf-localization.png)
 
 This monorepo contains **three analysis modules**:
 
