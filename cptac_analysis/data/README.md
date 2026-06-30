@@ -2,13 +2,14 @@
 
 Large CPTAC and reference files are **not** tracked in Git. Copy them under `cptac_analysis/data/` before running CPTAC validation.
 
-Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
+The processed data bundles are available from the shared Zenodo record:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
-| Functional data bundle | `functional/data/` | TBD |
-| Direction-classifier data bundle | `import_export/data/` | TBD |
+| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Direction-classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Required setup
 

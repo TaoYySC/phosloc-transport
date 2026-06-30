@@ -11,7 +11,7 @@ This subproject trains a binary classifier that predicts whether a transcription
 | Field | Value |
 |-------|-------|
 | Task | Functional transport phosphosite classification |
-| Feature set | `esm_window_site_pdb` - ESM-2 local window (31), center-site ESM embedding, and AlphaFold local graph features |
+| Feature set | `esm_graph` - ESM-2 local window (31), center-site embedding from the same window block, and AlphaFold local graph features |
 | Classifier | `esm_cnn2d_site_gnn` |
 | Window size | 31 |
 | Original run directory | `results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/` |
@@ -64,7 +64,7 @@ python scripts/1_1_run_experiment.py \
 | `configs/experiments/esm_window_site_pdb.yaml` | Experiment entry point: data paths, linked config files, and runtime settings (`device`, `output_dir`) |
 | `configs/split.yaml` | Predefined held-out test split and 5-fold stratified group cross-validation on the development set |
 | `configs/train.yaml` | `esm_cnn2d_site_gnn` architecture, optimization, and early-stopping settings |
-| `configs/feature_sets.yaml` | Feature block definitions used by `esm_window_site_pdb`: ESM-2 window embeddings, center-site embedding, and AlphaFold graph inputs |
+| `configs/feature_sets.yaml` | Feature block definitions used by `esm_graph`: ESM-2 window embeddings, center-site embedding derived by the loader, and AlphaFold graph inputs |
 | `configs/runs/esm_window_site_pdb_run_meta.json` | Snapshot of metrics, fold selection, and paths from the finalized run |
 
 ## Data

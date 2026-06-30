@@ -12,7 +12,8 @@ This subproject trains a binary classifier that predicts **nuclear accumulation 
 |-------|-------|
 | Task | Nuclear accumulation vs. cytoplasmic redistribution direction classification |
 | Label convention | Legacy labels: Import = 1, Export = 0 |
-| Feature set | `import_export_esm_window_only_supcon_ce_import_pos` - ESM-2 local window (21) with PLS-reduced window embeddings |
+| Feature set | `esm_window_only_supcon_ce` - ESM-2 local window (21) with PLS-reduced window embeddings |
+| Output tag | `esm_window_only_supcon_ce_import_pos` |
 | Model | `supcon_ce` with supervised contrastive loss and cross-entropy loss |
 | Window size | 21 |
 | Original run directory | `results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/` |
@@ -82,7 +83,7 @@ python scripts/run_import_export_experiment.py \
 | `configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml` | Experiment entry point: data paths, linked config files, and runtime settings (`device`, `output_dir`) |
 | `configs/split.yaml` | 5-fold stratified group cross-validation on annotated direction-labeled transport-positive sites |
 | `configs/train_supcon_ce_window_only.yaml` | `supcon_ce` architecture, SupCon+CE optimization, and training settings |
-| `configs/feature_sets_esm_window_only_supcon_ce.yaml` | Feature block definitions used by `import_export_esm_window_only_supcon_ce_import_pos`: ESM-2 window embeddings with PLS reduction |
+| `configs/feature_sets_esm_window_only_supcon_ce.yaml` | Feature block definitions used by `esm_window_only_supcon_ce`: ESM-2 window embeddings with PLS reduction |
 | `configs/runs/esm_window_only_supcon_ce_import_pos_run_meta.json` | Snapshot of metrics, fold selection, and paths from the finalized run |
 
 ## Data

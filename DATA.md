@@ -3,16 +3,14 @@
 All inputs required to **train**, **plot**, and **predict** live under each subproject's `data/` directory.
 Generated figures and new run outputs still go to `results/` (not shipped with the data bundle by default).
 
-Upload the **code repo** and **data directories** separately if needed:
+Upload the **code repo** and **data directories** separately if needed.
+All processed data bundles are available from one Zenodo record:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 | Upload unit | Path | Approx. size | Download / DOI |
 |-------------|------|--------------|----------------|
 | Code | repo root (exclude `**/data/` large dirs) | ~55 MB | GitHub repository |
-| Functional data | `functional/data/` | ~7.0 GB | TBD |
-| Direction-classifier data | `import_export/data/` (+ resolves shared links into `functional/data/`) | ~1.0 GB unique + shared | TBD |
-| CPTAC source bundle | `cptac_analysis/data/source/` | ~3.9 GB | TBD |
-
-Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
+| Processed data bundles | `functional/data/`, `import_export/data/`, `cptac_analysis/data/source/` | See Zenodo record | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## `functional/data/`
 

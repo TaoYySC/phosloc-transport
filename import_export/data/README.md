@@ -2,12 +2,13 @@
 
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
-Public data-download links are intentionally left blank while the data upload is in progress.
+The processed data bundles are available from the shared Zenodo record:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Direction-classifier data bundle | `import_export/data/` | TBD |
-| Shared functional data bundle | `functional/data/` | TBD |
+| Direction-classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Directory summary
 

@@ -45,7 +45,7 @@ The default analysis uses:
 Example cache preparation:
 
 ```bash
-python -c "from pyensembl import EnsemblRelease; EnsemblRelease(111).download(); EnsemblRelease(111).index()"
+python -c "from pyensembl import EnsemblRelease; EnsemblRelease(100).download(); EnsemblRelease(100).index()"
 ```
 
 Use the release configured by `--ensembl-release` if you change the default.
@@ -62,13 +62,14 @@ Large CPTAC and reference files are **not** tracked in Git. Prepare or symlink i
 
 See [`data/README.md`](data/README.md) for the expected directory layout.
 
-Public download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
+The processed data bundles are available from the shared Zenodo record:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 | Input bundle | Target path | Download / DOI |
 |--------------|-------------|----------------|
-| Functional data bundle | `../functional/data/` | TBD |
-| Direction-classifier data bundle | `../import_export/data/` | TBD |
-| CPTAC / ChIP / regulon source bundle | `data/source/` | TBD |
+| Functional data bundle | `../functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Direction-classifier data bundle | `../import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| CPTAC / ChIP / regulon source bundle | `data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Run integrated pipeline
 

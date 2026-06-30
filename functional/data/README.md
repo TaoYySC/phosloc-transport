@@ -2,11 +2,12 @@
 
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
-Public data-download links are intentionally left blank while the data upload is in progress.
+The processed data bundle is available from Zenodo:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Functional data bundle | `functional/data/` | TBD |
+| Functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Directory summary
 
