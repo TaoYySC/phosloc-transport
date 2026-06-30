@@ -39,7 +39,7 @@ The default analysis uses:
 ## Requirements
 
 - Root dependencies: [`requirements.txt`](../requirements.txt)
-- Additional packages: `pyensembl` (Ensembl gene annotation; listed in [`requirements-optional.txt`](../requirements-optional.txt))
+- Additional packages: `pyensembl` (Ensembl gene annotation; commented in [`requirements.txt`](../requirements.txt))
 - Ensure the required Ensembl release cache or annotation files are available locally before running the integrated pipeline
 
 Example cache preparation:
