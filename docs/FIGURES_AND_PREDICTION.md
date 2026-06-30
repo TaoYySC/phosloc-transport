@@ -13,7 +13,7 @@ All paths are relative to each subproject root (`functional/` or `import_export/
 Plot scripts read bundled inputs from `data/precomputed/` and `data/features/`.  
 Inference uses `data/model_artifacts/`. New figures are written to `results/`.
 
-## Functional transport classifier (`functional/scripts/`)
+## Localization-Regulatory Classifier (`functional/scripts/`)
 
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
@@ -34,13 +34,13 @@ python scripts/plot_model_ablation_comparison.py
 python scripts/predict_functional_transport.py --device cpu
 ```
 
-## Import/export direction classifier (`import_export/scripts/`)
+## Localization Direction Classifier (`import_export/scripts/`)
 
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
 | Figure 3b | `plot_import_export_model_performance.py` | `data/precomputed/.../metrics_all_runs.csv` | `results/1_transport_classifier_results/model_performance/` |
 | Figure 3c | `calculate_joint_direction_score.py` | `functional/data/precomputed/...`, IE per-fold predictions in `data/precomputed/` | `results/1_transport_classifier_results/joint_score/` |
-| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + functional ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/esm_window_only_supcon_ce_import_pos_score_distribution_platt/` |
+| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + Localization-Regulatory Classifier ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/esm_window_only_supcon_ce_import_pos_score_distribution_platt/` |
 | Figure 3d; Supp. Fig. 4d | `plot_import_export_feature_panel.py` | `data/precomputed/.../joint_score/`, `../functional/data/features/` | `results/4_1_feature_boxplot_stacked_barplot/importexport_selected_panel_no_negative/` |
 | **Prediction** | `predict_import_export_direction.py` | `data/model_artifacts/.../fold_artifacts/`, Platt calibrator | `results/1_transport_classifier_results/esm_window_only_import_pos_predictions/` |
 | **Training** | `run_import_export_experiment.py` | Experiment YAML, cluster CSV, embeddings | `results/run_*/Import_vs_Export/` |

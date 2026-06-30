@@ -1,6 +1,6 @@
-# Functional transport classifier
+# Localization-Regulatory Classifier
 
-Stage 1 training and inference pipeline for the PhosLoc-Transport repository.
+Localization-Regulatory Classifier training and inference pipeline for the PhosLoc-Transport repository. This stage corresponds to the FuncTransport model.
 
 ![Stage 1 localization-regulatory classifier architecture](../docs/assets/stage1-localization-regulatory-classifier.png)
 
@@ -10,7 +10,7 @@ This subproject trains a binary classifier that predicts whether a transcription
 
 | Field | Value |
 |-------|-------|
-| Task | Functional transport phosphosite classification |
+| Task | Localization-regulatory phosphosite classification |
 | Feature set | `esm_graph` - ESM-2 local window (31), center-site embedding from the same window block, and AlphaFold local graph features |
 | Classifier | `esm_cnn2d_site_gnn` |
 | Window size | 31 |
@@ -99,7 +99,7 @@ results/2_1_functional_classifier_results/predictions/
 
 - The positive class is a functional nuclear-transport regulatory phosphosite.
 - The model was developed for transcription-factor phosphosites and expects matching sequence, embedding, and structure resources.
-- Use the direction classifier (`../import_export/`) to classify nuclear accumulation versus cytoplasmic redistribution after identifying transport-positive candidate sites.
+- Use the Localization Direction Classifier (`../import_export/`) to classify nuclear accumulation versus cytoplasmic redistribution after identifying transport-positive candidate sites.
 
 ## Related documentation
 

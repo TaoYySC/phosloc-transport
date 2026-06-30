@@ -9,7 +9,7 @@ The processed data bundles are available from the shared Zenodo record:
 |--------|-------------|----------------|
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 | Functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
-| Direction-classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Required setup
 
@@ -55,7 +55,7 @@ The integrated pipeline also reads PhosLoc-Transport classifier outputs from the
 
 | Path | Purpose |
 |------|---------|
-| `../../import_export/data/precomputed/1_transport_classifier_results/joint_score/` | Stable direction-classifier site predictions |
+| `../../import_export/data/precomputed/1_transport_classifier_results/joint_score/` | Stable Localization Direction Classifier site predictions |
 | `../../functional/data/dataset_phos_site/TF_positive_phos_site_0608.csv` | Known positive phosphosite labels |
 
 If `source/` is missing, pass `--linkedomics-base`, `--chip-dir`, and related CLI flags in `run_import_target_regulation_analysis.py` to your local copies.

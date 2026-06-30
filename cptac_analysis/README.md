@@ -28,7 +28,7 @@ The default analysis uses:
 
 | Component | Default behavior |
 |-----------|------------------|
-| Site set | Stable predicted nuclear accumulation sites from direction-classifier joint-score outputs |
+| Site set | Stable predicted nuclear accumulation sites from Localization Direction Classifier joint-score outputs |
 | Phospho split | `median_nonmissing` split on site phosphoproteomics abundance |
 | Target sets | Signed TF target genes from curated regulons, optionally intersected with ChIP-derived target support |
 | Directional test | High-phospho versus low-phospho target expression in the expected signed direction |
@@ -68,7 +68,7 @@ The processed data bundles are available from the shared Zenodo record:
 | Input bundle | Target path | Download / DOI |
 |--------------|-------------|----------------|
 | Functional data bundle | `../functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
-| Direction-classifier data bundle | `../import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Localization Direction Classifier data bundle | `../import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 | CPTAC / ChIP / regulon source bundle | `data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Run integrated pipeline

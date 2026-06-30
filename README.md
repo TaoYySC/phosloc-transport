@@ -1,6 +1,6 @@
 # PhosLoc-Transport
 
-Machine-learning pipelines for transcription-factor phosphosite nuclear transport prediction.
+PhosLoc-Transport is a two-stage framework for prioritizing transcription factor phosphosites that may regulate nuclear transport. The Localization-Regulatory Classifier integrates local sequence, central phosphosite, and AlphaFold-derived structural features to identify candidate localization-regulatory sites; the Localization Direction Classifier predicts whether candidate sites are associated with nuclear accumulation or cytoplasmic redistribution.
 
 <img src="docs/assets/phosphorylation-dependent-tf-localization.png" alt="Phosphorylation-dependent control of TF localization" width="720">
 
@@ -8,14 +8,14 @@ This monorepo contains **three analysis modules**:
 
 | Subproject | Task |
 |------------|------|
-| [`functional/`](functional/) | Functional transport phosphosite classification |
-| [`import_export/`](import_export/) | Nuclear accumulation vs. cytoplasmic redistribution direction classification |
+| [`functional/`](functional/) | Localization-Regulatory Classifier |
+| [`import_export/`](import_export/) | Localization Direction Classifier |
 | [`cptac_analysis/`](cptac_analysis/) | CPTAC validation of predicted nuclear accumulation-associated phosphosites |
 
 Typical workflow:
 
-1. Use the functional transport classifier to score whether a TF phosphosite is likely to regulate nuclear transport.
-2. Use the direction classifier on transport-positive candidate sites to classify nuclear accumulation versus cytoplasmic redistribution.
+1. Use the Localization-Regulatory Classifier to score whether a TF phosphosite is likely to regulate nuclear transport.
+2. Use the Localization Direction Classifier on transport-positive candidate sites to classify nuclear accumulation versus cytoplasmic redistribution.
 3. Use CPTAC validation to evaluate predicted nuclear accumulation-associated sites against tumor multi-omics target-gene regulation.
 
 ## Requirements
@@ -51,7 +51,7 @@ The default prediction input is `functional/data/dataset_phos_site/tf_all_phos_s
 
 Rows with missing sequences, invalid positions, non-STY sites, missing ESM embeddings, or unavailable AlphaFold/PDB positions may be dropped during preprocessing. Dropped-row reports are written when supported by the script options.
 
-Run Stage 1 functional transport prediction:
+Run Localization-Regulatory Classifier prediction:
 
 ```bash
 cd functional
@@ -165,8 +165,8 @@ The finalized training runs are recorded below.
 
 | Pipeline | Original run |
 |----------|--------------|
-| Functional transport | `run_20260610_204935_ESM Window+Site+PDB` |
-| Nuclear accumulation / cytoplasmic redistribution direction | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
+| Localization-Regulatory Classifier | `run_20260610_204935_ESM Window+Site+PDB` |
+| Localization Direction Classifier | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
 | CPTAC validation | `results/import_target_regulation/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.
@@ -178,19 +178,21 @@ Run metadata snapshots for Stages 1-2 are stored under each subproject's `config
 | [docs/TRAINING_RUNS.md](docs/TRAINING_RUNS.md) | Full reproduction details and hyperparameters |
 | [docs/FIGURES_AND_PREDICTION.md](docs/FIGURES_AND_PREDICTION.md) | Figure and prediction scripts |
 | [DATA.md](DATA.md) | Train / plot / predict data layout |
-| [functional/README.md](functional/README.md) | Functional pipeline overview |
-| [import_export/README.md](import_export/README.md) | Direction-classifier pipeline overview |
+| [functional/README.md](functional/README.md) | Localization-Regulatory Classifier overview |
+| [import_export/README.md](import_export/README.md) | Localization Direction Classifier overview |
 | [cptac_analysis/README.md](cptac_analysis/README.md) | CPTAC validation overview |
 
 ## Troubleshooting
 
 - Use `--device cpu` on machines without a CUDA-capable GPU.
 - Check that `ACC_ID` values match the FASTA, ESM embedding filenames, and AlphaFold/PDB files.
-- For Stage 1 prediction, use `--skip_pdb_position_filter` only when you intentionally want to bypass the PDB-position availability check.
+- For Localization-Regulatory Classifier prediction, use `--skip_pdb_position_filter` only when you intentionally want to bypass the PDB-position availability check.
 - For CPTAC validation, install `pyensembl` and prepare the Ensembl release cache before running the integrated CPTAC pipeline.
 - Paths in config files are relative to each subproject root unless stated otherwise.
 
 ## Citation
+
+Associated manuscript: **A direction-aware framework links transcription factor phosphosites to localization and transcriptional output**.
 
 If you use PhosLoc-Transport, please cite the associated manuscript once available.
 For the accompanying processed data and model artifacts, cite the Zenodo record:

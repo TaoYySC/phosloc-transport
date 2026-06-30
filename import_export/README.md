@@ -1,6 +1,6 @@
-# Nuclear accumulation / cytoplasmic redistribution direction classifier
+# Localization Direction Classifier
 
-Stage 2 training and inference pipeline for the PhosLoc-Transport repository.
+Localization Direction Classifier training and inference pipeline for the PhosLoc-Transport repository.
 
 ![Stage 2 localization direction classifier workflow](../docs/assets/stage2-localization-direction-classifier.png)
 
@@ -10,7 +10,7 @@ This subproject trains a binary classifier that predicts **nuclear accumulation 
 
 | Field | Value |
 |-------|-------|
-| Task | Nuclear accumulation vs. cytoplasmic redistribution direction classification |
+| Task | Localization direction classification: nuclear accumulation vs. cytoplasmic redistribution |
 | Label convention | Legacy labels: Import = 1, Export = 0 |
 | Feature set | `esm_window_only_supcon_ce` - ESM-2 local window (21) with PLS-reduced window embeddings |
 | Output tag | `esm_window_only_supcon_ce_import_pos` |
@@ -21,7 +21,7 @@ This subproject trains a binary classifier that predicts **nuclear accumulation 
 
 ## Predict new sites
 
-Run this model on transport-positive candidate sites, typically after Stage 1 functional prediction. The default prediction input is `../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv`. For custom inputs, provide at least `ACC_ID` and `POSITION`; `INDEX` is recommended as a stable site identifier.
+Run this model on transport-positive candidate sites, typically after Localization-Regulatory Classifier prediction. The default prediction input is `../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv`. For custom inputs, provide at least `ACC_ID` and `POSITION`; `INDEX` is recommended as a stable site identifier.
 
 ```bash
 cd import_export
@@ -57,7 +57,7 @@ Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_ex
 
 ## Joint score and stable predictions
 
-`scripts/calculate_joint_direction_score.py` combines Stage 1 functional ensemble scores with direction predictions. The stable prediction files used by feature-panel plots and the CPTAC validation are stored under:
+`scripts/calculate_joint_direction_score.py` combines Localization-Regulatory Classifier ensemble scores with direction predictions. The stable prediction files used by feature-panel plots and the CPTAC validation are stored under:
 
 ```text
 data/precomputed/1_transport_classifier_results/joint_score/

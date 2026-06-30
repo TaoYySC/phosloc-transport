@@ -74,7 +74,7 @@ import_export/data/
             `-- all_fold_test_predictions_platt.csv
 ```
 
-Shared negatives, functional ensemble predictions, and feature tables are read from `../functional/data/`.
+Shared negatives, Localization-Regulatory Classifier ensemble predictions, and feature tables are read from `../functional/data/`.
 
 ## `cptac_analysis/data/`
 

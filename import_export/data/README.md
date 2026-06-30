@@ -1,4 +1,4 @@
-# Direction-classifier subproject - data
+# Localization Direction Classifier subproject - data
 
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
@@ -7,7 +7,7 @@ The processed data bundles are available from the shared Zenodo record:
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Direction-classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 | Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 ## Directory summary
@@ -21,9 +21,9 @@ The processed data bundles are available from the shared Zenodo record:
 | `model_artifacts/` | Finalized IE fold artifacts + Platt calibrator (inference) |
 | `precomputed/` | Bundled CSV inputs for figure / joint-score scripts |
 
-Negatives, functional ensemble predictions, and manual features are loaded from `../functional/data/`.
+Negatives, Localization-Regulatory Classifier ensemble predictions, and manual features are loaded from `../functional/data/`.
 
-When uploading **only** the direction-classifier data bundle, include local `fasta/` and `TF_esm_embedding/` (populated by `scripts/populate_data.sh` from `functional/data/`).
+When uploading **only** the Localization Direction Classifier data bundle, include local `fasta/` and `TF_esm_embedding/` (populated by `scripts/populate_data.sh` from `functional/data/`).
 
 ## Prediction input
 

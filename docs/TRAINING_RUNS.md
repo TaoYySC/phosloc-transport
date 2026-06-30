@@ -1,15 +1,15 @@
 # Finalized training and analysis runs
 
-This repository keeps the scripts and configs used to train the two main classifiers (Stages 1–2) and to reproduce the reference CPTAC analysis (Stage 3).
+This repository keeps the scripts and configs used to train the two main classifiers (Localization-Regulatory Classifier and Localization Direction Classifier) and to reproduce the reference CPTAC analysis.
 
 ---
 
-## Run 1 — Functional Transport (ESM Window + Site + PDB)
+## Run 1 — Localization-Regulatory Classifier (ESM Window + Site + PDB)
 
 | Field | Value |
 |-------|-------|
 | **Original output** | `results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/` |
-| **Task** | Functional Transport |
+| **Task** | Localization-regulatory phosphosite classification |
 | **Feature set** | `esm_graph` (ESM window-31 + AlphaFold graph) |
 | **Model** | `esm_cnn2d_site_gnn` |
 | **CV** | Fixed test (20%) + 5-fold StratifiedGroupKFold on development set |
@@ -69,12 +69,12 @@ python scripts/1_1_run_experiment.py \
 
 ---
 
-## Run 2 — Import vs Export (ESM Window + SupCon+CE, Import positive)
+## Run 2 — Localization Direction Classifier (ESM Window + SupCon+CE, Import positive)
 
 | Field | Value |
 |-------|-------|
 | **Original output** | `results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/` |
-| **Task** | Import vs Export |
+| **Task** | Localization direction classification |
 | **Feature set** | `esm_window_only_supcon_ce` |
 | **Model** | `supcon_ce` (PLS-64 + SupCon+CE) |
 | **Positive class** | Import (LABEL=1) |
