@@ -7,7 +7,7 @@ All paths are relative to each subproject root (`functional/` or `import_export/
 ## Setup
 
 1. Install dependencies from the repo root: `pip install -r requirements.txt`
-2. Optional: `pip install -r requirements-optional.txt` (`pyensembl` required for Stage 3)
+2. Optional for Stage 3: uncomment `pyensembl` in `requirements.txt`, then rerun `pip install -r requirements.txt`
 3. Provide data under `functional/data/`, `import_export/data/`, and `cptac_analysis/data/source/` — see **[DATA.md](../DATA.md)**.
 
 Plot scripts read bundled inputs from `data/precomputed/` and `data/features/`.  
