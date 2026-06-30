@@ -16,21 +16,18 @@ Files in this record
 --------------------
 
   PhosLoc-Transport_functional_data.tar
-    7.40 GB (6.89 GiB; 7,401,318,912 bytes)
     Stage 1: features, ESM embeddings, AlphaFold PDBs,
              model checkpoints, precomputed CSVs
     Archive top-level path: data/
     Extracts to: functional/data/
 
   PhosLoc-Transport_import_export_data.tar
-    5.93 GB (5.53 GiB; 5,932,662,784 bytes)
     Stage 2: features, model artifacts, Platt calibrator,
              precomputed predictions and joint scores
     Archive top-level path: data/
     Extracts to: import_export/data/
 
   PhosLoc-Transport_cptac_source.tar
-    4.03 GB (3.75 GiB; 4,029,896,192 bytes)
     Stage 3: CPTAC omics, ChIP-Atlas targets, regulons,
              UniProt idmapping
     Archive top-level path: source/
