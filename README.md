@@ -115,13 +115,18 @@ Large feature files, model artifacts, CPTAC source files, and intermediate data 
 
 Full inventory and upload notes: **[DATA.md](DATA.md)**.
 
-Public data-download links are intentionally left blank while the data upload is in progress. The three data bundles are expected to share one Zenodo DOI.
+The processed data bundles and model artifacts are available from Zenodo:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
+Download the required archive(s) from the Zenodo record and extract them from
+the repository root so the bundled top-level paths restore the expected
+`functional/data/`, `import_export/data/`, and `cptac_analysis/data/source/`
+directories.
 
 | Data bundle | Target path | Download / DOI |
 |-------------|-------------|----------------|
-| Functional training, prediction, and plotting data | `functional/data/` | TBD |
-| Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | TBD |
-| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | TBD |
+| Functional training, prediction, and plotting data | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
+| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.21021066](https://doi.org/10.5281/zenodo.21021066) |
 
 Reproducing the finalized runs requires processed feature files, training splits, model configs, and run metadata snapshots bundled under each subproject's `data/` and `configs/` trees. Without the data bundles, the repository can be inspected but training, prediction, plotting, and CPTAC analysis will not run end to end.
 
@@ -185,7 +190,9 @@ Run metadata snapshots for Stages 1-2 are stored under each subproject's `config
 
 ## Citation
 
-If you use PhosLoc-Transport, please cite the associated manuscript once available. Add the manuscript DOI and BibTeX entry here after release.
+If you use PhosLoc-Transport, please cite the associated manuscript once available.
+For the accompanying processed data and model artifacts, cite the Zenodo record:
+[`10.5281/zenodo.21021066`](https://doi.org/10.5281/zenodo.21021066).
 
 ## License
 
