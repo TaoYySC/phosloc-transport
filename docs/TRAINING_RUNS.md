@@ -172,7 +172,7 @@ results/run_<timestamp>_<output_tag>/
 ## Prerequisites
 
 1. Install dependencies: `pip install -r requirements.txt`
-2. Optional: `pip install -r requirements-optional.txt` (Stage 3 requires `pyensembl`)
+2. Optional for Stage 3: uncomment `pyensembl` in `requirements.txt`, then rerun `pip install -r requirements.txt`
 3. Symlink large data dirs (see `functional/data/README.md`, `cptac_analysis/data/README.md`)
 4. Cluster CSVs included under each subproject's `data/cluster/` (one file per run); ESM embeddings and PDB must be prepared locally
 
