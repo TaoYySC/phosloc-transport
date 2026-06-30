@@ -2,6 +2,8 @@
 
 Stage 2 training and inference pipeline for the PhosLoc-Transport repository.
 
+![Stage 2 localization direction classifier workflow](../docs/assets/stage2-localization-direction-classifier.png)
+
 This subproject trains a binary classifier that predicts **nuclear accumulation versus cytoplasmic redistribution** among annotated transport-positive transcription factor phosphosites. Historical model labels and file paths use `Import` as the positive class and `Export` as the negative class. It does **not** classify functional transport activity against background phosphosites; that task is handled by the [`functional/`](../functional/) subproject.
 
 ## Finalized model

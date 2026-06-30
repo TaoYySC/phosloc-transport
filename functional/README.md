@@ -2,6 +2,8 @@
 
 Stage 1 training and inference pipeline for the PhosLoc-Transport repository.
 
+![Stage 1 localization-regulatory classifier architecture](../docs/assets/stage1-localization-regulatory-classifier.png)
+
 This subproject trains a binary classifier that predicts whether a transcription factor phosphosite is likely to have **functional nuclear transport regulatory activity**, compared with background phosphosites. It does **not** predict nuclear accumulation versus cytoplasmic redistribution direction; direction classification is handled by the [`import_export/`](../import_export/) subproject.
 
 ## Finalized model
