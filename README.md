@@ -2,7 +2,7 @@
 
 Machine-learning pipelines for transcription-factor phosphosite nuclear transport prediction.
 
-![Phosphorylation-dependent control of TF localization](docs/assets/phosphorylation-dependent-tf-localization.png)
+<img src="docs/assets/phosphorylation-dependent-tf-localization.png" alt="Phosphorylation-dependent control of TF localization" width="720">
 
 This monorepo contains **three analysis modules**:
 
