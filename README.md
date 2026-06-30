@@ -20,19 +20,19 @@ Typical workflow:
 
 ## Requirements
 
-- **Python** 3.10.13
-- **Core dependencies** ([`requirements.txt`](requirements.txt)): `numpy==2.0.2`, `pandas==2.2.2`, `scipy==1.13.1`, `scikit-learn==1.6.1`, `matplotlib==3.9.4`, `seaborn==0.13.2`, `PyYAML==6.0.2`, `joblib==1.4.2`, `tqdm==4.67.1`, `xgboost==2.1.4`, `torch==2.6.0`, `torch-geometric==2.6.1` (GPU training validated with `torch==2.6.0+cu124`, CUDA 12.4)
+- **Python** 3.9.18 (tested in conda env `phosloc`)
+- **Dependencies** ([`requirements.txt`](requirements.txt)): `numpy==2.0.2`, `pandas==2.2.2`, `scipy==1.13.1`, `scikit-learn==1.6.1`, `matplotlib==3.9.4`, `seaborn==0.13.2`, `PyYAML==6.0.2`, `joblib==1.4.2`, `tqdm==4.67.1`, `xgboost==2.1.4`, `torch==2.6.0`, `torch-geometric==2.6.1` (GPU training validated with `torch==2.6.0+cu124`, CUDA 12.4)
 - **GPU** acceleration is recommended for ESM embedding extraction and AlphaFold graph-based model training
 
-**Optional** ([`requirements-optional.txt`](requirements-optional.txt)): `fair-esm==2.0.1`, `umap-learn==0.5.7`, `pyensembl` (CPTAC validation). Optional packages are not needed to reproduce finalized runs if all precomputed features are provided.
+Optional dependencies are documented as commented lines in [`requirements.txt`](requirements.txt). Uncomment only the packages needed for your workflow, then rerun `pip install -r requirements.txt`.
 
 ## Quick start
 
 ```bash
 cd phosloc-transport
-python3.10 -m venv .venv && source .venv/bin/activate
+conda activate phosloc
 pip install -r requirements.txt
-# optional: pip install -r requirements-optional.txt
+# optional: uncomment the needed lines in requirements.txt, then rerun pip install -r requirements.txt
 ```
 
 Place or symlink local data under `functional/data/`, `import_export/data/`, and `cptac_analysis/data/` as needed (see [Data availability](#data-availability)).
@@ -137,8 +137,7 @@ Reproducing the finalized runs requires processed feature files, training splits
 ```text
 phosloc-transport/
 |-- DATA.md                      # complete data inventory
-|-- requirements.txt
-|-- requirements-optional.txt    # fair-esm, umap-learn, pyensembl
+|-- requirements.txt             # core dependencies; optional packages are commented
 |-- docs/
 |-- scripts/                     # populate_data.sh (data migration helper)
 |-- functional/
