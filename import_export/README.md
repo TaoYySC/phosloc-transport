@@ -42,7 +42,7 @@ Important options:
 | `--fasta_path` | FASTA used to attach `FULL_SEQUENCE` |
 | `--run_dir` | Saved fold artifacts and Platt calibrator |
 | `--output_csv` | Ensemble prediction CSV path |
-| `--device` | Use `cuda` or `cpu` |
+| `--device` | Use `auto`, `cuda`, or `cpu`; `auto` selects CUDA when available and otherwise uses CPU |
 | `--threshold` | Override decision threshold on `mean_prob_positive` |
 | `--save_dropped_csv` | Save rows dropped during preprocessing |
 | `--use_platt` / `--no-use_platt` | Enable or disable Platt calibration when the calibrator exists |

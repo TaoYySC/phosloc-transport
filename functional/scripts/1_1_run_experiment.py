@@ -1,7 +1,14 @@
 import argparse
 import copy
 import re
+import sys
 from pathlib import Path
+
+import torch
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.utils import (
     load_yaml,
@@ -15,6 +22,18 @@ from src.train.experiment_runner import run_experiment_grid
 
 
 DEFAULT_CLUSTER_DIR = Path(__file__).resolve().parents[1] / "data" / "cluster"
+
+
+def resolve_device(device):
+    device = str(device).strip().lower()
+    if device == "auto":
+        resolved = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[INFO] Resolved device=auto -> {resolved}")
+        return resolved
+    if device.startswith("cuda") and not torch.cuda.is_available():
+        print(f"[WARN] Requested device={device}, but CUDA is unavailable. Falling back to cpu.")
+        return "cpu"
+    return device
 
 
 def resolve_cluster_window_for_esm(window_size):
@@ -99,6 +118,12 @@ def parse_args():
         type=str,
         default=None,
         help="Cluster suffix tag (e.g. c50, c80). For window_size < 31, uses window31 cluster.",
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=None,
+        help="Override runtime device: auto, cuda, cuda:<id>, or cpu.",
     )
     return parser.parse_args()
 
@@ -301,7 +326,11 @@ def main():
         cluster_tag=args.cluster_tag,
     )
 
+    if args.device is not None:
+        exp_cfg.setdefault("runtime", {})["device"] = args.device
+
     runtime_cfg = exp_cfg.get("runtime", {})
+    runtime_cfg["device"] = resolve_device(runtime_cfg.get("device", "auto"))
     output_root = runtime_cfg.get("output_dir", "results")
 
     timestamp = get_timestamp()

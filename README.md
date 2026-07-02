@@ -22,7 +22,7 @@ Typical workflow:
 
 - **Python** 3.9.18 (tested in conda env `phosloc`)
 - **Dependencies** ([`requirements.txt`](requirements.txt)): `numpy==2.0.2`, `pandas==2.2.2`, `scipy==1.13.1`, `scikit-learn==1.6.1`, `matplotlib==3.9.4`, `seaborn==0.13.2`, `PyYAML==6.0.2`, `joblib==1.4.2`, `tqdm==4.67.1`, `xgboost==2.1.4`, `torch==2.6.0`, `torch-geometric==2.6.1` (GPU training validated with `torch==2.6.0+cu124`, CUDA 12.4)
-- **GPU** acceleration is recommended for ESM embedding extraction and AlphaFold graph-based model training
+- **GPU** acceleration is recommended for ESM embedding extraction and AlphaFold graph-based model training. Prediction and training entry points accept `--device auto`, `cuda`, or `cpu`; `auto` selects CUDA when available and otherwise uses CPU.
 
 Optional dependencies are documented as commented lines in [`requirements.txt`](requirements.txt). Uncomment only the packages needed for your workflow, then rerun `pip install -r requirements.txt`.
 

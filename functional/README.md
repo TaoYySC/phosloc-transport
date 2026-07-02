@@ -40,7 +40,7 @@ Important options:
 | `--input_csv` | Input phosphosite table |
 | `--output_csv` | Prediction CSV path |
 | `--fasta_path` | FASTA used when `FULL_SEQUENCE` is missing |
-| `--device` | Use `cuda` or `cpu` |
+| `--device` | Use `auto`, `cuda`, or `cpu`; `auto` selects CUDA when available and otherwise uses CPU |
 | `--with-threshold` | Add `final_threshold` and `pred_label` columns |
 | `--skip_pdb_position_filter` | Skip filtering rows that lack the required AlphaFold/PDB residue position |
 

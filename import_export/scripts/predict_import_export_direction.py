@@ -87,7 +87,12 @@ def parse_args():
         choices=["import", "export"],
         help="Which class is LABEL=1 / prob_positive. Default: from run_meta.json.",
     )
-    parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        help="Device to use for torch models: auto, cuda, cuda:<id>, or cpu. Default: auto.",
+    )
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--acc_col", type=str, default="ACC_ID")
     parser.add_argument("--site_col", type=str, default="POSITION")
@@ -128,6 +133,18 @@ def load_run_meta(run_dir):
     if meta_path.exists():
         return load_meta(meta_path)
     return {}
+
+
+def resolve_device(device):
+    device = str(device).strip().lower()
+    if device == "auto":
+        resolved = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[INFO] Resolved device=auto -> {resolved}")
+        return resolved
+    if device.startswith("cuda") and not torch.cuda.is_available():
+        print(f"[WARN] Requested device={device}, but CUDA is unavailable. Falling back to cpu.")
+        return "cpu"
+    return device
 
 
 def resolve_feature_set(args, run_meta):
@@ -254,11 +271,12 @@ def prepare_new_dataframe(args, embedding_dir=None):
     raw_df = pd.read_csv(args.input_csv)
     n_input = len(raw_df)
 
-    df = standardize_sample_table(
+    raw_df = standardize_sample_table(
         raw_df,
         acc_col=args.acc_col,
         site_col=args.site_col,
     )
+    df = raw_df.copy()
 
     df, fasta_dropped_df = attach_sequence_drop_missing(
         df=df,
@@ -276,7 +294,7 @@ def prepare_new_dataframe(args, embedding_dir=None):
             cluster_group_col="Cluster_ID",
         )
 
-    before_drop = len(df)
+    before_invalid_df = df.copy()
     df = drop_invalid_site_rows(
         df=df,
         acc_col=args.acc_col,
@@ -287,8 +305,8 @@ def prepare_new_dataframe(args, embedding_dir=None):
     )
 
     kept_index = set(df["INDEX"].astype(str))
-    invalid_dropped_df = raw_df.loc[
-        ~raw_df["INDEX"].astype(str).isin(kept_index)
+    invalid_dropped_df = before_invalid_df.loc[
+        ~before_invalid_df["INDEX"].astype(str).isin(kept_index)
     ].copy()
 
     esm_dropped_df = pd.DataFrame()
@@ -309,7 +327,11 @@ def prepare_new_dataframe(args, embedding_dir=None):
         if len(part) > 0:
             part = part.copy()
             if "drop_reason" not in part.columns:
-                part["drop_reason"] = reason
+                if "_predictable_reason" in part.columns:
+                    part["drop_reason"] = part["_predictable_reason"]
+                else:
+                    part["drop_reason"] = reason
+            part = part.drop(columns=["_predictable_reason"], errors="ignore")
             dropped_parts.append(part)
 
     dropped_df = (
@@ -320,7 +342,7 @@ def prepare_new_dataframe(args, embedding_dir=None):
 
     stats = {
         "n_input": int(n_input),
-        "n_after_fasta": int(before_drop),
+        "n_after_fasta": int(len(before_invalid_df)),
         "n_kept": int(len(df)),
         "n_dropped": int(len(dropped_df)),
     }
@@ -455,6 +477,7 @@ def resolve_platt_calibrator(args, run_dir):
 
 def main():
     args = parse_args()
+    args.device = resolve_device(args.device)
     run_dir = Path(args.run_dir)
     run_meta = load_run_meta(run_dir)
     feature_set = resolve_feature_set(args, run_meta)

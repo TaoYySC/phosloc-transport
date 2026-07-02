@@ -5,11 +5,16 @@
 import argparse
 import pickle
 import re
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import torch
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.models.build_model import build_model
 from src.train.trainer import Trainer
@@ -18,7 +23,6 @@ from src.utils import attach_sequence_and_cluster, drop_invalid_site_rows
 
 FOLD_DIR_PATTERN = re.compile(r"fold_(\d+)", re.IGNORECASE)
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT_ROOT = (
     PROJECT_ROOT
     / "data/model_artifacts/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/artifacts"
@@ -64,7 +68,12 @@ def parse_args():
         default=str(DEFAULT_FASTA_PATH),
         help=f"FASTA used when FULL_SEQUENCE is missing. Default: {DEFAULT_FASTA_PATH}",
     )
-    parser.add_argument("--device", type=str, default="cuda")
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        help="Device to use: auto, cuda, cuda:<id>, or cpu. Default: auto.",
+    )
     parser.add_argument("--batch_size", type=int, default=256)
     parser.add_argument("--threshold_mode", type=str, choices=["artifact", "mean"], default="artifact")
     parser.add_argument("--mean_threshold", type=float, default=0.5)
@@ -93,8 +102,33 @@ def load_pickle(path):
         return pickle.load(f)
 
 
+def resolve_device(device):
+    device = str(device).strip().lower()
+    if device == "auto":
+        resolved = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"[INFO] Resolved device=auto -> {resolved}")
+        return resolved
+    if device.startswith("cuda") and not torch.cuda.is_available():
+        print(f"[WARN] Requested device={device}, but CUDA is unavailable. Falling back to cpu.")
+        return "cpu"
+    return device
+
+
+def ensure_index_column(df, acc_col="ACC_ID", site_col="POSITION"):
+    df = df.copy()
+    if "INDEX" not in df.columns:
+        if acc_col not in df.columns or site_col not in df.columns:
+            raise ValueError(
+                f"Input table must contain INDEX or both {acc_col!r} and {site_col!r}."
+            )
+        df["INDEX"] = df[acc_col].astype(str).str.strip() + "_" + df[site_col].astype(str).str.strip()
+    df["INDEX"] = df["INDEX"].astype(str).str.strip()
+    return df
+
+
 def prepare_prediction_dataframe(input_csv, fasta_path=None):
     df = pd.read_csv(input_csv)
+    df = ensure_index_column(df, acc_col="ACC_ID", site_col="POSITION")
 
     if fasta_path is not None and "FULL_SEQUENCE" not in df.columns:
         df = attach_sequence_and_cluster(
@@ -361,6 +395,7 @@ def predict_one_artifact(artifact_dir, df, device="cuda", batch_size=256):
 
 def main():
     args = parse_args()
+    args.device = resolve_device(args.device)
     folds_only = not args.all_artifacts
     no_threshold = not args.with_threshold
     expected_folds = args.expected_folds if folds_only else None
