@@ -18,6 +18,19 @@ Typical workflow:
 2. Use the Localization Direction Classifier on transport-positive candidate sites to classify nuclear accumulation versus cytoplasmic redistribution.
 3. Use CPTAC validation to evaluate predicted nuclear accumulation-associated sites against tumor multi-omics target-gene regulation.
 
+## Documentation guide
+
+Start here for installation, prediction examples, and the repository map. For task-specific details, use the focused documents below:
+
+| Need | Read |
+|------|------|
+| Data bundle contents, expected paths, and upload notes | [`DATA.md`](DATA.md) |
+| Functional classifier prediction or training | [`functional/README.md`](functional/README.md) |
+| Import/export direction prediction, joint score, or training | [`import_export/README.md`](import_export/README.md) |
+| CPTAC target-regulation validation | [`cptac_analysis/README.md`](cptac_analysis/README.md) |
+| Exact finalized run settings and hyperparameters | [`docs/TRAINING_RUNS.md`](docs/TRAINING_RUNS.md) |
+| Figure, supplementary figure, and prediction script mapping | [`docs/FIGURES_AND_PREDICTION.md`](docs/FIGURES_AND_PREDICTION.md) |
+
 ## Requirements
 
 - **Python** 3.9.18 (tested in conda env `phosloc`)
@@ -112,6 +125,9 @@ Large feature files, model artifacts, CPTAC source files, and intermediate data 
 - [`cptac_analysis/data/README.md`](cptac_analysis/data/README.md)
 
 Full inventory and upload notes: **[DATA.md](DATA.md)**.
+The root-level [`PhosLoc-Transport_DATA_README.txt`](PhosLoc-Transport_DATA_README.txt)
+is a companion note for the external Zenodo data bundle; [`DATA.md`](DATA.md)
+remains the canonical in-repository data inventory.
 
 The processed data bundles and model artifacts are available from Zenodo:
 [`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
@@ -154,6 +170,11 @@ phosloc-transport/
     `-- results/                 # integrated pipeline + boxplot outputs
 ```
 
+The documented commands use `scripts/` paths as stable command-line entry points.
+Some longer scripts are thin wrappers whose implementation lives under the
+matching subproject's `src/` directory; this keeps user-facing commands unchanged
+while making the code easier to maintain.
+
 ## Reproducibility
 
 The finalized training runs are recorded below.
@@ -178,14 +199,8 @@ The tests focus on input preprocessing, group-aware splits, and script entry poi
 
 ## Documentation
 
-| Resource | Description |
-|----------|-------------|
-| [docs/TRAINING_RUNS.md](docs/TRAINING_RUNS.md) | Full reproduction details and hyperparameters |
-| [docs/FIGURES_AND_PREDICTION.md](docs/FIGURES_AND_PREDICTION.md) | Figure and prediction scripts |
-| [DATA.md](DATA.md) | Train / plot / predict data layout |
-| [functional/README.md](functional/README.md) | Localization-Regulatory Classifier overview |
-| [import_export/README.md](import_export/README.md) | Localization Direction Classifier overview |
-| [cptac_analysis/README.md](cptac_analysis/README.md) | CPTAC validation overview |
+See the [Documentation guide](#documentation-guide) near the top of this README
+for the recommended reading path.
 
 ## Troubleshooting
 

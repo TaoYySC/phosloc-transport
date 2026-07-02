@@ -1,6 +1,10 @@
 PhosLoc-Transport - Data bundle README
 ======================================
 
+This file is the companion README intended to be distributed with the
+external Zenodo data archives. In the GitHub repository, DATA.md is the
+canonical in-repository data inventory.
+
 This Zenodo record contains processed inputs and model artifacts for the
 PhosLoc-Transport three-stage pipelines (functional classification,
 import/export direction, and CPTAC target-regulation analysis).

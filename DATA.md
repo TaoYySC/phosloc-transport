@@ -6,6 +6,9 @@ Generated figures and new run outputs still go to `results/` (not shipped with t
 Upload the **code repo** and **data directories** separately if needed.
 All processed data bundles are available from one Zenodo record:
 [`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
+The root-level `PhosLoc-Transport_DATA_README.txt` is intended as the README
+shipped beside the Zenodo archives. This file is the canonical in-repository
+data inventory.
 
 | Upload unit | Path | Approx. size | Download / DOI |
 |-------------|------|--------------|----------------|
