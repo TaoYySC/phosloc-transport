@@ -1,6 +1,6 @@
 # Figures, supplementary figures, and prediction scripts
 
-This document maps manuscript panels to scripts in the monorepo. Script names reflect **function**; panel labels are in each script's header comment.
+This document maps manuscript panels to scripts in the monorepo. Script names reflect **function**; panel labels are in each script's header comment. Some long-running scripts are thin CLI wrappers whose implementations live under the corresponding subproject's `src/` directory; run commands still use the `scripts/` paths listed below.
 
 All paths are relative to each subproject root (`functional/` or `import_export/`).
 
@@ -68,7 +68,6 @@ Example:
 
 ```bash
 cd cptac_analysis
-export PYTHONPATH="${PWD}/scripts:${PYTHONPATH}"
 
 python scripts/run_import_target_regulation_analysis.py
 python scripts/plot_phosphosite_across_cancers.py --site-labels STAT3_Y705 STAT3_S701

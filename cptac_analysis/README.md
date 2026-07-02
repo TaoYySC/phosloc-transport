@@ -75,7 +75,6 @@ The processed data bundles are available from the shared Zenodo record:
 
 ```bash
 cd cptac_analysis
-export PYTHONPATH="${PWD}/scripts:${PYTHONPATH}"
 
 python scripts/run_import_target_regulation_analysis.py
 ```
@@ -104,7 +103,6 @@ python scripts/run_import_target_regulation_analysis.py \
 
 ```bash
 cd cptac_analysis
-export PYTHONPATH="${PWD}/scripts:${PYTHONPATH}"
 
 python scripts/plot_phosphosite_across_cancers.py \
   --site-labels STAT3_Y705 STAT3_S701 E2F4_S244 NFATC2_S53 HSF1_S326
@@ -116,7 +114,6 @@ Default outputs: `results/phosphosite_across_cancers_boxplots/`
 
 ```bash
 cd cptac_analysis
-export PYTHONPATH="${PWD}/scripts:${PYTHONPATH}"
 
 python scripts/plot_significant_sites_combined.py
 ```

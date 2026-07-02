@@ -23,7 +23,6 @@ The default prediction input is `data/dataset_phos_site/tf_all_phos_site_for_pre
 
 ```bash
 cd functional
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/predict_functional_transport.py \
   --input_csv data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
@@ -50,7 +49,6 @@ Output columns include the original/transformed site columns, `prob_fold_*`, art
 
 ```bash
 cd functional
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \

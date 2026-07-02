@@ -55,7 +55,6 @@ Run Localization-Regulatory Classifier prediction:
 
 ```bash
 cd functional
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/predict_functional_transport.py \
   --input_csv data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
@@ -70,7 +69,6 @@ Run direction prediction on transport-positive candidate sites:
 
 ```bash
 cd import_export
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/predict_import_export_direction.py \
   --input_csv ../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
@@ -85,7 +83,6 @@ Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_ex
 
 ```bash
 cd functional
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \
@@ -96,7 +93,6 @@ python scripts/1_1_run_experiment.py \
 
 ```bash
 cd import_export
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/run_import_export_experiment.py \
   --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \

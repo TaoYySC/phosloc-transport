@@ -25,7 +25,6 @@ Run this model on transport-positive candidate sites, typically after Localizati
 
 ```bash
 cd import_export
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/predict_import_export_direction.py \
   --input_csv ../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
@@ -80,7 +79,6 @@ The reference stable files use probability and fold-vote filters encoded in the 
 
 ```bash
 cd import_export
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/run_import_export_experiment.py \
   --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \

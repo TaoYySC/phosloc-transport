@@ -33,7 +33,6 @@ functional/configs/
 
 ```bash
 cd functional
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \
@@ -98,7 +97,6 @@ import_export/configs/
 
 ```bash
 cd import_export
-export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/run_import_export_experiment.py \
   --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \
