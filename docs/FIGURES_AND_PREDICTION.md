@@ -50,7 +50,7 @@ Example:
 ```bash
 cd import_export
 python scripts/plot_import_export_model_performance.py
-python scripts/calculate_joint_direction_score.py
+python scripts/calculate_joint_direction_score.py --functional_score_threshold 0.6 --min_vote 4
 python scripts/predict_import_export_direction.py --device cpu
 ```
 

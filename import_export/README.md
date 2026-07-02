@@ -63,6 +63,17 @@ Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_ex
 data/precomputed/1_transport_classifier_results/joint_score/
 ```
 
+The script can be run with defaults or explicit paths:
+
+```bash
+python scripts/calculate_joint_direction_score.py \
+  --functional_csv ../functional/data/precomputed/2_1_functional_classifier_results/predictions/esm_window_site_pdb_5_folds_ensemble_predictions.csv \
+  --import_export_csv data/precomputed/1_transport_classifier_results/esm_window_only_import_pos_predictions/tf_all_phos_site_predictions_per_fold.csv \
+  --output_dir results/1_transport_classifier_results/joint_score \
+  --functional_score_threshold 0.6 \
+  --min_vote 4
+```
+
 The reference stable files use probability and fold-vote filters encoded in the filename, for example `predicted_import_stable_gt0p6_vote4.csv` means sites passing the selected score threshold (`gt0p6`) and at least four supporting fold votes (`vote4`).
 
 ## Train

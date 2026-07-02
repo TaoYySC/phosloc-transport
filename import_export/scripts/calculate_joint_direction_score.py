@@ -1,7 +1,8 @@
-# Panels: Figure 3(c)
+﻿# Panels: Figure 3(c)
 
 
 # Monorepo path constants (monorepo relative paths)
+import argparse
 import sys
 from pathlib import Path
 
@@ -37,69 +38,58 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 
-functional_csv = (
-    str(FUNCTIONAL_PRECOMPUTED / "2_1_functional_classifier_results" / "predictions" / "esm_window_site_pdb_5_folds_ensemble_predictions.csv")
+DEFAULT_FUNCTIONAL_CSV = (
+    FUNCTIONAL_PRECOMPUTED
+    / "2_1_functional_classifier_results"
+    / "predictions"
+    / "esm_window_site_pdb_5_folds_ensemble_predictions.csv"
 )
-
-import_export_csv = (
-    str(DATA_PRECOMPUTED / "1_transport_classifier_results" / "esm_window_only_import_pos_predictions" / "tf_all_phos_site_predictions_per_fold.csv")
+DEFAULT_IMPORT_EXPORT_CSV = (
+    DATA_PRECOMPUTED
+    / "1_transport_classifier_results"
+    / "esm_window_only_import_pos_predictions"
+    / "tf_all_phos_site_predictions_per_fold.csv"
 )
-
-known_positive_csv = (
-    str(FUNCTIONAL_ROOT / "data" / "dataset_phos_site" / "TF_positive_phos_site_0608.csv")
+DEFAULT_KNOWN_POSITIVE_CSV = (
+    FUNCTIONAL_ROOT / "data" / "dataset_phos_site" / "TF_positive_phos_site_0608.csv"
 )
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "1_transport_classifier_results" / "joint_score"
+DEFAULT_MERGE_MODE = "matched_only"
+DEFAULT_FUNCTIONAL_SCORE_THRESHOLD = 0.6
 
-output_dir = str(PROJECT_ROOT / "results" / "1_transport_classifier_results" / "joint_score")
-os.makedirs(output_dir, exist_ok=True)
-
-plot_dir = os.path.join(output_dir, "distribution_plots")
-os.makedirs(plot_dir, exist_ok=True)
-
-output_csv = os.path.join(
-    output_dir,
-    "tf_all_phos_site_joint_direction_score.csv"
-)
-
-stable_import_output_csv = os.path.join(
-    output_dir,
-    "predicted_import_stable_gt0p6_vote4.csv"
-)
-
-stable_export_output_csv = os.path.join(
-    output_dir,
-    "predicted_export_stable_gt0p6_vote4.csv"
-)
-
-stable_combined_output_csv = os.path.join(
-    output_dir,
-    "predicted_import_export_stable_gt0p6_vote4.csv"
-)
-
-stable_rule_summary_csv = os.path.join(
-    output_dir,
-    "stable_site_rule_count_summary_gt0p6_vote4.csv"
-)
-
-missing_functional_csv = os.path.join(
-    output_dir,
-    "sites_missing_functional_probability.csv"
-)
-
-scatter_output_png = os.path.join(
-    plot_dir,
-    "direction_score_scatter_known_sites.png"
-)
-
-MERGE_MODE = "matched_only"
-
-FUNCTIONAL_SCORE_THRESHOLD = 0.6
-
-# Stability filter on 5-fold direction scores (same logic as 1_6)
+# Stability filter on 5-fold direction scores (same logic as 1_6).
 MIN_VOTE = 4
 
 IMPORT_COLOR = "#9a3f3f"
 EXPORT_COLOR = "#4f7d95"
 UNKNOWN_COLOR = "#bdbdbd"
+
+
+def parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Combine functional transport probabilities with direction predictions."
+    )
+    parser.add_argument("--functional_csv", type=Path, default=DEFAULT_FUNCTIONAL_CSV)
+    parser.add_argument("--import_export_csv", type=Path, default=DEFAULT_IMPORT_EXPORT_CSV)
+    parser.add_argument("--known_positive_csv", type=Path, default=DEFAULT_KNOWN_POSITIVE_CSV)
+    parser.add_argument("--output_dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument(
+        "--merge_mode",
+        choices=["matched_only", "keep_all_fill_zero"],
+        default=DEFAULT_MERGE_MODE,
+    )
+    parser.add_argument(
+        "--functional_score_threshold",
+        type=float,
+        default=DEFAULT_FUNCTIONAL_SCORE_THRESHOLD,
+    )
+    parser.add_argument("--min_vote", type=int, default=MIN_VOTE)
+    return parser.parse_args(argv)
+
+
+def format_threshold_tag(value):
+    text = f"{float(value):g}".replace("-", "m").replace(".", "p")
+    return f"gt{text}"
 
 
 def ensure_index(df, acc_col="ACC_ID", site_col="POSITION"):
@@ -618,447 +608,477 @@ def plot_direction_score_signed_scatter_known_direction(
     print(f"[DONE] Saved plot: {pdf_output_path}")
 
 
-functional_df = pd.read_csv(functional_csv)
-import_export_df = pd.read_csv(import_export_csv)
-known_df = pd.read_csv(known_positive_csv)
 
-functional_df = ensure_index(functional_df)
-import_export_df = ensure_index(import_export_df)
-known_df = ensure_index(known_df)
+def main(argv=None):
+    args = parse_args(argv)
+    functional_csv = str(args.functional_csv)
+    import_export_csv = str(args.import_export_csv)
+    known_positive_csv = str(args.known_positive_csv)
+    output_dir = str(args.output_dir)
+    plot_dir = os.path.join(output_dir, "distribution_plots")
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(plot_dir, exist_ok=True)
 
-known_df = add_known_direction_to_known_df(known_df)
+    threshold_tag = format_threshold_tag(args.functional_score_threshold)
+    vote_tag = f"vote{args.min_vote}"
+    output_csv = os.path.join(output_dir, "tf_all_phos_site_joint_direction_score.csv")
+    stable_import_output_csv = os.path.join(output_dir, f"predicted_import_stable_{threshold_tag}_{vote_tag}.csv")
+    stable_export_output_csv = os.path.join(output_dir, f"predicted_export_stable_{threshold_tag}_{vote_tag}.csv")
+    stable_combined_output_csv = os.path.join(output_dir, f"predicted_import_export_stable_{threshold_tag}_{vote_tag}.csv")
+    stable_rule_summary_csv = os.path.join(output_dir, f"stable_site_rule_count_summary_{threshold_tag}_{vote_tag}.csv")
+    missing_functional_csv = os.path.join(output_dir, "sites_missing_functional_probability.csv")
+    scatter_output_png = os.path.join(plot_dir, "direction_score_scatter_known_sites.png")
 
-check_unique_index(functional_df, "functional_csv")
-check_unique_index(import_export_df, "import_export_csv")
+    merge_mode = args.merge_mode
+    functional_score_threshold = float(args.functional_score_threshold)
+    min_vote = int(args.min_vote)
 
-if "mean_prob" not in functional_df.columns:
-    raise ValueError("Missing column in functional file: mean_prob")
+    functional_df = pd.read_csv(functional_csv)
+    import_export_df = pd.read_csv(import_export_csv)
+    known_df = pd.read_csv(known_positive_csv)
 
-import_prob_cols = get_seed_fold_prob_cols(import_export_df, "prob_import")
-export_prob_cols = get_seed_fold_prob_cols(import_export_df, "prob_export")
+    functional_df = ensure_index(functional_df)
+    import_export_df = ensure_index(import_export_df)
+    known_df = ensure_index(known_df)
 
-if len(import_prob_cols) == 0:
-    raise ValueError("No import probability columns were found. Expected columns like prob_import_seed42_fold1.")
+    known_df = add_known_direction_to_known_df(known_df)
 
-if len(export_prob_cols) == 0:
-    raise ValueError("No export probability columns were found. Expected columns like prob_export_seed42_fold1.")
+    check_unique_index(functional_df, "functional_csv")
+    check_unique_index(import_export_df, "import_export_csv")
 
-for col in import_prob_cols + export_prob_cols:
-    import_export_df[col] = pd.to_numeric(import_export_df[col], errors="coerce")
+    if "mean_prob" not in functional_df.columns:
+        raise ValueError("Missing column in functional file: mean_prob")
 
-if import_export_df[import_prob_cols + export_prob_cols].isna().any().any():
-    na_summary = import_export_df[import_prob_cols + export_prob_cols].isna().sum()
-    na_summary = na_summary[na_summary > 0].to_dict()
-    raise ValueError(f"NaN values found in probability columns after numeric conversion: {na_summary}")
+    import_prob_cols = get_seed_fold_prob_cols(import_export_df, "prob_import")
+    export_prob_cols = get_seed_fold_prob_cols(import_export_df, "prob_export")
 
-functional_prob_cols_raw = get_functional_prob_fold_cols(functional_df, prefix="prob_fold")
+    if len(import_prob_cols) == 0:
+        raise ValueError("No import probability columns were found. Expected columns like prob_import_seed42_fold1.")
 
-if len(functional_prob_cols_raw) == 0:
-    raise ValueError(
-        "No functional fold probability columns were found. Expected prob_fold_1 to prob_fold_5."
+    if len(export_prob_cols) == 0:
+        raise ValueError("No export probability columns were found. Expected columns like prob_export_seed42_fold1.")
+
+    for col in import_prob_cols + export_prob_cols:
+        import_export_df[col] = pd.to_numeric(import_export_df[col], errors="coerce")
+
+    if import_export_df[import_prob_cols + export_prob_cols].isna().any().any():
+        na_summary = import_export_df[import_prob_cols + export_prob_cols].isna().sum()
+        na_summary = na_summary[na_summary > 0].to_dict()
+        raise ValueError(f"NaN values found in probability columns after numeric conversion: {na_summary}")
+
+    functional_prob_cols_raw = get_functional_prob_fold_cols(functional_df, prefix="prob_fold")
+
+    if len(functional_prob_cols_raw) == 0:
+        raise ValueError(
+            "No functional fold probability columns were found. Expected prob_fold_1 to prob_fold_5."
+        )
+
+    for col in functional_prob_cols_raw:
+        functional_df[col] = pd.to_numeric(functional_df[col], errors="coerce")
+
+    if functional_df[functional_prob_cols_raw].isna().any().any():
+        na_summary = functional_df[functional_prob_cols_raw].isna().sum()
+        na_summary = na_summary[na_summary > 0].to_dict()
+        raise ValueError(f"NaN values found in functional probability columns after numeric conversion: {na_summary}")
+
+    functional_df["mean_prob"] = pd.to_numeric(functional_df["mean_prob"], errors="coerce")
+    functional_df["std_prob"] = pd.to_numeric(functional_df["std_prob"], errors="coerce")
+    functional_mean_from_folds = functional_df[functional_prob_cols_raw].mean(axis=1)
+    mean_prob_diff = (functional_df["mean_prob"] - functional_mean_from_folds).abs()
+    if mean_prob_diff.max() > 1e-6:
+        print(
+            "[WARN] mean_prob differs from the average of prob_fold_* columns. "
+            "Using mean_prob as the functional ensemble score."
+        )
+
+    import_export_df["mean_prob_import"] = import_export_df[import_prob_cols].mean(axis=1)
+    import_export_df["std_prob_import"] = import_export_df[import_prob_cols].std(axis=1)
+
+    import_export_df["mean_prob_export"] = import_export_df[export_prob_cols].mean(axis=1)
+    import_export_df["std_prob_export"] = import_export_df[export_prob_cols].std(axis=1)
+
+    import_col_map = {
+        get_seed_fold_key(col, "prob_import"): col
+        for col in import_prob_cols
+    }
+
+    export_col_map = {
+        get_seed_fold_key(col, "prob_export"): col
+        for col in export_prob_cols
+    }
+
+    common_seed_fold_keys = sorted(set(import_col_map.keys()) & set(export_col_map.keys()))
+
+    if len(common_seed_fold_keys) == 0:
+        raise ValueError("No matched import and export seed fold probability columns were found.")
+
+    functional_keep_cols = [
+        "INDEX",
+        "ACC_ID",
+        "MOD_RSD",
+        "POSITION",
+        "FULL_SEQUENCE",
+        "LABEL",
+        "prob_fold_1",
+        "artifact_fold_1",
+        "seed_fold_1",
+        "prob_fold_2",
+        "artifact_fold_2",
+        "seed_fold_2",
+        "prob_fold_3",
+        "artifact_fold_3",
+        "seed_fold_3",
+        "prob_fold_4",
+        "artifact_fold_4",
+        "seed_fold_4",
+        "prob_fold_5",
+        "artifact_fold_5",
+        "seed_fold_5",
+        "mean_prob",
+        "std_prob",
+        "final_threshold",
+        "pred_label",
+    ]
+
+    functional_keep_cols = [
+        col for col in functional_keep_cols
+        if col in functional_df.columns
+    ]
+
+    functional_keep = functional_df[functional_keep_cols].copy()
+
+    functional_keep = functional_keep.rename(
+        columns={
+            "ACC_ID": "functional_ACC_ID",
+            "MOD_RSD": "functional_MOD_RSD",
+            "POSITION": "functional_POSITION",
+            "FULL_SEQUENCE": "functional_FULL_SEQUENCE",
+            "LABEL": "functional_LABEL",
+            "prob_fold_1": "functional_prob_fold_1",
+            "artifact_fold_1": "functional_artifact_fold_1",
+            "seed_fold_1": "functional_seed_fold_1",
+            "prob_fold_2": "functional_prob_fold_2",
+            "artifact_fold_2": "functional_artifact_fold_2",
+            "seed_fold_2": "functional_seed_fold_2",
+            "prob_fold_3": "functional_prob_fold_3",
+            "artifact_fold_3": "functional_artifact_fold_3",
+            "seed_fold_3": "functional_seed_fold_3",
+            "prob_fold_4": "functional_prob_fold_4",
+            "artifact_fold_4": "functional_artifact_fold_4",
+            "seed_fold_4": "functional_seed_fold_4",
+            "prob_fold_5": "functional_prob_fold_5",
+            "artifact_fold_5": "functional_artifact_fold_5",
+            "seed_fold_5": "functional_seed_fold_5",
+            "mean_prob": "mean_prob_functional",
+            "std_prob": "std_prob_functional",
+            "final_threshold": "functional_final_threshold",
+            "pred_label": "functional_pred_label",
+        }
     )
 
-for col in functional_prob_cols_raw:
-    functional_df[col] = pd.to_numeric(functional_df[col], errors="coerce")
+    merged_df = import_export_df.merge(
+        functional_keep,
+        on="INDEX",
+        how="left",
+        validate="one_to_one"
+    )
 
-if functional_df[functional_prob_cols_raw].isna().any().any():
-    na_summary = functional_df[functional_prob_cols_raw].isna().sum()
-    na_summary = na_summary[na_summary > 0].to_dict()
-    raise ValueError(f"NaN values found in functional probability columns after numeric conversion: {na_summary}")
+    missing_functional_mask = merged_df["mean_prob_functional"].isna()
+    missing_functional_n = int(missing_functional_mask.sum())
 
-functional_df["mean_prob"] = pd.to_numeric(functional_df["mean_prob"], errors="coerce")
-functional_df["std_prob"] = pd.to_numeric(functional_df["std_prob"], errors="coerce")
-functional_mean_from_folds = functional_df[functional_prob_cols_raw].mean(axis=1)
-mean_prob_diff = (functional_df["mean_prob"] - functional_mean_from_folds).abs()
-if mean_prob_diff.max() > 1e-6:
+    if missing_functional_n > 0:
+        missing_df = merged_df.loc[missing_functional_mask].copy()
+        missing_df.to_csv(missing_functional_csv, index=False)
+
+        print(f"[WARN] {missing_functional_n} sites cannot match functional probabilities.")
+        print(f"[WARN] Saved unmatched sites to: {missing_functional_csv}")
+        print("[WARN] Examples:")
+        print(missing_df["INDEX"].head(10).tolist())
+
+        if merge_mode == "matched_only":
+            merged_df = merged_df.loc[~missing_functional_mask].copy()
+            print(f"[INFO] MERGE_MODE=matched_only. Remaining sites: {len(merged_df)}")
+
+        elif merge_mode == "keep_all_fill_zero":
+            merged_df["mean_prob_functional"] = merged_df["mean_prob_functional"].fillna(0.0)
+            merged_df["std_prob_functional"] = merged_df["std_prob_functional"].fillna(0.0)
+            merged_df["functional_pred_label"] = merged_df["functional_pred_label"].fillna(0)
+            merged_df["functional_final_threshold"] = merged_df["functional_final_threshold"].fillna(np.nan)
+
+            for col in get_merged_functional_prob_fold_cols(merged_df):
+                merged_df[col] = merged_df[col].fillna(0.0)
+
+            print(f"[INFO] MERGE_MODE=keep_all_fill_zero. Kept all sites: {len(merged_df)}")
+
+        else:
+            raise ValueError(f"Unknown merge_mode: {merge_mode}")
+
+    merged_df["functional_selected"] = (
+        pd.to_numeric(merged_df["mean_prob_functional"], errors="coerce") >= functional_score_threshold
+    )
+
+    before_functional_filter_n = len(merged_df)
+    merged_df = merged_df.loc[merged_df["functional_selected"]].copy()
+    after_functional_filter_n = len(merged_df)
+
     print(
-        "[WARN] mean_prob differs from the average of prob_fold_* columns. "
-        "Using mean_prob as the functional ensemble score."
+        f"[INFO] Functional filter: mean_prob_functional >= {functional_score_threshold}. "
+        f"Before={before_functional_filter_n}, after={after_functional_filter_n}, "
+        f"removed={before_functional_filter_n - after_functional_filter_n}"
     )
 
-import_export_df["mean_prob_import"] = import_export_df[import_prob_cols].mean(axis=1)
-import_export_df["std_prob_import"] = import_export_df[import_prob_cols].std(axis=1)
+    known_cols = ["INDEX", "known_direction_norm"]
 
-import_export_df["mean_prob_export"] = import_export_df[export_prob_cols].mean(axis=1)
-import_export_df["std_prob_export"] = import_export_df[export_prob_cols].std(axis=1)
+    for col in [
+        "ACC_ID",
+        "POSITION",
+        "MOD_RSD",
+        "RESIDUE",
+        "LABEL",
+        "Transport_Direction",
+        "Gene",
+        "GENE",
+        "Gene Symbol",
+        "PMID",
+        "SOURCE",
+    ]:
+        if col in known_df.columns and col not in known_cols:
+            known_cols.append(col)
 
-import_col_map = {
-    get_seed_fold_key(col, "prob_import"): col
-    for col in import_prob_cols
-}
+    known_anno = known_df[known_cols].drop_duplicates(subset=["INDEX"]).copy()
 
-export_col_map = {
-    get_seed_fold_key(col, "prob_export"): col
-    for col in export_prob_cols
-}
+    known_anno = known_anno.rename(
+        columns={
+            col: f"known_{col}"
+            for col in known_anno.columns
+            if col not in ["INDEX", "known_direction_norm"]
+        }
+    )
 
-common_seed_fold_keys = sorted(set(import_col_map.keys()) & set(export_col_map.keys()))
+    merged_df = merged_df.merge(
+        known_anno,
+        on="INDEX",
+        how="left"
+    )
 
-if len(common_seed_fold_keys) == 0:
-    raise ValueError("No matched import and export seed fold probability columns were found.")
+    merged_df["known_status"] = np.where(
+        merged_df["known_direction_norm"].isin(["Known Import", "Known Export"]),
+        "Known",
+        "Unknown"
+    )
 
-functional_keep_cols = [
-    "INDEX",
-    "ACC_ID",
-    "MOD_RSD",
-    "POSITION",
-    "FULL_SEQUENCE",
-    "LABEL",
-    "prob_fold_1",
-    "artifact_fold_1",
-    "seed_fold_1",
-    "prob_fold_2",
-    "artifact_fold_2",
-    "seed_fold_2",
-    "prob_fold_3",
-    "artifact_fold_3",
-    "seed_fold_3",
-    "prob_fold_4",
-    "artifact_fold_4",
-    "seed_fold_4",
-    "prob_fold_5",
-    "artifact_fold_5",
-    "seed_fold_5",
-    "mean_prob",
-    "std_prob",
-    "final_threshold",
-    "pred_label",
-]
+    merged_df, direction_raw_fold_cols, direction_score_fold_cols = calculate_per_fold_direction_scores(
+        merged_df,
+        common_seed_fold_keys,
+        functional_prob_col="mean_prob_functional",
+    )
 
-functional_keep_cols = [
-    col for col in functional_keep_cols
-    if col in functional_df.columns
-]
+    import_mu_threshold, export_mu_threshold = compute_known_positive_direction_thresholds(merged_df)
 
-functional_keep = functional_df[functional_keep_cols].copy()
+    print(
+        f"[INFO] Known-positive direction score thresholds: "
+        f"import_mu >= {import_mu_threshold:.6f} (min known import), "
+        f"export_mu < {export_mu_threshold:.6f} (max known export)"
+    )
 
-functional_keep = functional_keep.rename(
-    columns={
-        "ACC_ID": "functional_ACC_ID",
-        "MOD_RSD": "functional_MOD_RSD",
-        "POSITION": "functional_POSITION",
-        "FULL_SEQUENCE": "functional_FULL_SEQUENCE",
-        "LABEL": "functional_LABEL",
-        "prob_fold_1": "functional_prob_fold_1",
-        "artifact_fold_1": "functional_artifact_fold_1",
-        "seed_fold_1": "functional_seed_fold_1",
-        "prob_fold_2": "functional_prob_fold_2",
-        "artifact_fold_2": "functional_artifact_fold_2",
-        "seed_fold_2": "functional_seed_fold_2",
-        "prob_fold_3": "functional_prob_fold_3",
-        "artifact_fold_3": "functional_artifact_fold_3",
-        "seed_fold_3": "functional_seed_fold_3",
-        "prob_fold_4": "functional_prob_fold_4",
-        "artifact_fold_4": "functional_artifact_fold_4",
-        "seed_fold_4": "functional_seed_fold_4",
-        "prob_fold_5": "functional_prob_fold_5",
-        "artifact_fold_5": "functional_artifact_fold_5",
-        "seed_fold_5": "functional_seed_fold_5",
-        "mean_prob": "mean_prob_functional",
-        "std_prob": "std_prob_functional",
-        "final_threshold": "functional_final_threshold",
-        "pred_label": "functional_pred_label",
-    }
-)
+    merged_df, global_median = apply_stability_filter(
+        merged_df,
+        direction_score_fold_cols,
+        import_mu_threshold=import_mu_threshold,
+        export_mu_threshold=export_mu_threshold,
+        min_vote=min_vote,
+    )
 
-merged_df = import_export_df.merge(
-    functional_keep,
-    on="INDEX",
-    how="left",
-    validate="one_to_one"
-)
+    merged_df["direction_margin_raw"] = (
+        merged_df["mean_prob_import"] - merged_df["mean_prob_export"]
+    ).abs()
 
-missing_functional_mask = merged_df["mean_prob_functional"].isna()
-missing_functional_n = int(missing_functional_mask.sum())
-
-if missing_functional_n > 0:
-    missing_df = merged_df.loc[missing_functional_mask].copy()
-    missing_df.to_csv(missing_functional_csv, index=False)
-
-    print(f"[WARN] {missing_functional_n} sites cannot match functional probabilities.")
-    print(f"[WARN] Saved unmatched sites to: {missing_functional_csv}")
-    print("[WARN] Examples:")
-    print(missing_df["INDEX"].head(10).tolist())
-
-    if MERGE_MODE == "matched_only":
-        merged_df = merged_df.loc[~missing_functional_mask].copy()
-        print(f"[INFO] MERGE_MODE=matched_only. Remaining sites: {len(merged_df)}")
-
-    elif MERGE_MODE == "keep_all_fill_zero":
-        merged_df["mean_prob_functional"] = merged_df["mean_prob_functional"].fillna(0.0)
-        merged_df["std_prob_functional"] = merged_df["std_prob_functional"].fillna(0.0)
-        merged_df["functional_pred_label"] = merged_df["functional_pred_label"].fillna(0)
-        merged_df["functional_final_threshold"] = merged_df["functional_final_threshold"].fillna(np.nan)
-
-        for col in get_merged_functional_prob_fold_cols(merged_df):
-            merged_df[col] = merged_df[col].fillna(0.0)
-
-        print(f"[INFO] MERGE_MODE=keep_all_fill_zero. Kept all sites: {len(merged_df)}")
-
-    else:
-        raise ValueError(f"Unknown MERGE_MODE: {MERGE_MODE}")
-
-merged_df["functional_selected"] = (
-    pd.to_numeric(merged_df["mean_prob_functional"], errors="coerce") >= FUNCTIONAL_SCORE_THRESHOLD
-)
-
-before_functional_filter_n = len(merged_df)
-merged_df = merged_df.loc[merged_df["functional_selected"]].copy()
-after_functional_filter_n = len(merged_df)
-
-print(
-    f"[INFO] Functional filter: mean_prob_functional >= {FUNCTIONAL_SCORE_THRESHOLD}. "
-    f"Before={before_functional_filter_n}, after={after_functional_filter_n}, "
-    f"removed={before_functional_filter_n - after_functional_filter_n}"
-)
-
-known_cols = ["INDEX", "known_direction_norm"]
-
-for col in [
-    "ACC_ID",
-    "POSITION",
-    "MOD_RSD",
-    "RESIDUE",
-    "LABEL",
-    "Transport_Direction",
-    "Gene",
-    "GENE",
-    "Gene Symbol",
-    "PMID",
-    "SOURCE",
-]:
-    if col in known_df.columns and col not in known_cols:
-        known_cols.append(col)
-
-known_anno = known_df[known_cols].drop_duplicates(subset=["INDEX"]).copy()
-
-known_anno = known_anno.rename(
-    columns={
-        col: f"known_{col}"
-        for col in known_anno.columns
-        if col not in ["INDEX", "known_direction_norm"]
-    }
-)
-
-merged_df = merged_df.merge(
-    known_anno,
-    on="INDEX",
-    how="left"
-)
-
-merged_df["known_status"] = np.where(
-    merged_df["known_direction_norm"].isin(["Known Import", "Known Export"]),
-    "Known",
-    "Unknown"
-)
-
-merged_df, direction_raw_fold_cols, direction_score_fold_cols = calculate_per_fold_direction_scores(
-    merged_df,
-    common_seed_fold_keys,
-    functional_prob_col="mean_prob_functional",
-)
-
-import_mu_threshold, export_mu_threshold = compute_known_positive_direction_thresholds(merged_df)
-
-print(
-    f"[INFO] Known-positive direction score thresholds: "
-    f"import_mu >= {import_mu_threshold:.6f} (min known import), "
-    f"export_mu < {export_mu_threshold:.6f} (max known export)"
-)
-
-merged_df, global_median = apply_stability_filter(
-    merged_df,
-    direction_score_fold_cols,
-    import_mu_threshold=import_mu_threshold,
-    export_mu_threshold=export_mu_threshold,
-)
-
-merged_df["direction_margin_raw"] = (
-    merged_df["mean_prob_import"] - merged_df["mean_prob_export"]
-).abs()
-
-merged_df["pred_direction_by_score"] = np.select(
-    [
-        merged_df["direction_score"] > 0,
-        merged_df["direction_score"] < 0,
-    ],
-    [
-        "Nuclear Import",
-        "Nuclear Export",
-    ],
-    default="Tie"
-)
-
-merged_df["functional_import_score"] = np.where(
-    merged_df["direction_score"] > 0,
-    merged_df["direction_score"],
-    0.0
-)
-
-merged_df["functional_export_score"] = np.where(
-    merged_df["direction_score"] < 0,
-    -merged_df["direction_score"],
-    0.0
-)
-
-front_cols = [
-    "INDEX",
-    "ACC_ID",
-    "POSITION",
-    "functional_MOD_RSD",
-    "known_status",
-    "known_direction_norm",
-    "mean_prob_functional",
-    "std_prob_functional",
-    "functional_selected",
-    "functional_final_threshold",
-    "functional_pred_label",
-    "mean_prob_import",
-    "std_prob_import",
-    "mean_prob_export",
-    "std_prob_export",
-    "direction_raw",
-    "direction_raw_std",
-    "direction_score",
-    "direction_score_std",
-    "direction_score_mu",
-    "direction_score_sigma",
-    "direction_score_global_median",
-    "vote_import",
-    "vote_export",
-    "stable_predicted_import",
-    "stable_predicted_export",
-    "stable_predicted_direction",
-    "direction_abs_score",
-    "direction_margin_raw",
-    "pred_direction_by_score",
-    "functional_import_score",
-    "functional_export_score",
-    "functional_prob_fold_1",
-    "functional_prob_fold_2",
-    "functional_prob_fold_3",
-    "functional_prob_fold_4",
-    "functional_prob_fold_5",
-]
-
-front_cols = front_cols + direction_raw_fold_cols + direction_score_fold_cols
-
-known_annotation_cols = [
-    col for col in merged_df.columns
-    if col.startswith("known_") and col not in front_cols
-]
-
-front_cols = front_cols + known_annotation_cols
-front_cols = [col for col in front_cols if col in merged_df.columns]
-front_cols = list(dict.fromkeys(front_cols))
-
-other_cols = [col for col in merged_df.columns if col not in front_cols]
-
-final_df = merged_df[front_cols + other_cols].copy()
-final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
-
-final_df = final_df.sort_values(
-    by=["direction_abs_score", "mean_prob_functional"],
-    ascending=[False, False]
-)
-
-final_df.to_csv(output_csv, index=False)
-
-stable_import_df = final_df.loc[final_df["stable_predicted_import"]].copy()
-stable_export_df = final_df.loc[final_df["stable_predicted_export"]].copy()
-stable_combined_df = final_df.loc[
-    final_df["stable_predicted_import"] | final_df["stable_predicted_export"]
-].copy()
-
-stable_import_df = stable_import_df.sort_values(
-    by=["direction_score_mu", "vote_import", "mean_prob_functional"],
-    ascending=[False, False, False],
-)
-stable_export_df = stable_export_df.sort_values(
-    by=["direction_score_mu", "vote_export", "mean_prob_functional"],
-    ascending=[True, False, False],
-)
-stable_combined_df = stable_combined_df.sort_values(
-    by=["stable_predicted_direction", "direction_abs_score", "mean_prob_functional"],
-    ascending=[True, False, False],
-)
-
-stable_rule_summary_df = build_stability_rule_summary(
-    final_df,
-    global_median,
-    import_mu_threshold,
-    export_mu_threshold,
-)
-
-stable_import_df.to_csv(stable_import_output_csv, index=False)
-stable_export_df.to_csv(stable_export_output_csv, index=False)
-stable_combined_df.to_csv(stable_combined_output_csv, index=False)
-stable_rule_summary_df.to_csv(stable_rule_summary_csv, index=False)
-
-plot_direction_score_signed_scatter_known_direction(
-    final_df,
-    direction_score_fold_cols,
-    scatter_output_png,
-    import_mu_threshold=import_mu_threshold,
-    export_mu_threshold=export_mu_threshold,
-)
-
-print(f"[DONE] Saved output to: {output_csv}")
-print(f"[DONE] Saved stable import sites to: {stable_import_output_csv}")
-print(f"[DONE] Saved stable export sites to: {stable_export_output_csv}")
-print(f"[DONE] Saved stable combined sites to: {stable_combined_output_csv}")
-print(f"[DONE] Saved stability rule summary to: {stable_rule_summary_csv}")
-print(f"[DONE] Saved scatter plot to: {scatter_output_png}")
-print(f"[INFO] Number of final scored sites: {len(final_df)}")
-print(f"[INFO] Number of stable import sites: {len(stable_import_df)}")
-print(f"[INFO] Number of stable export sites: {len(stable_export_df)}")
-print(f"[INFO] Number of stable combined sites: {len(stable_combined_df)}")
-print(f"[INFO] Global direction score median: {global_median}")
-print(f"[INFO] Number of sites missing functional probability: {missing_functional_n}")
-print(f"[INFO] Functional probability threshold: {FUNCTIONAL_SCORE_THRESHOLD}")
-print(f"[INFO] Stability import rule: mu >= {import_mu_threshold}, vote_import >= {MIN_VOTE}, mu > global_median")
-print(f"[INFO] Stability export rule: mu < {export_mu_threshold}, vote_export >= {MIN_VOTE}, mu < global_median")
-print(f"[INFO] Import probability columns: {len(import_prob_cols)}")
-print(f"[INFO] Export probability columns: {len(export_prob_cols)}")
-print(f"[INFO] Matched seed fold pairs: {len(common_seed_fold_keys)}")
-print(f"[INFO] Per-fold direction score columns: {len(direction_score_fold_cols)}")
-
-print("[INFO] Stable predicted direction counts:")
-print(final_df["stable_predicted_direction"].value_counts())
-
-print("[INFO] Stability rule count summary:")
-print(stable_rule_summary_df)
-
-print("[INFO] Known direction counts:")
-print(final_df["known_direction_norm"].fillna("Unknown").value_counts())
-
-print("[INFO] Predicted direction counts:")
-print(final_df["pred_direction_by_score"].value_counts())
-
-print("[INFO] Direction raw summary:")
-print(final_df["direction_raw"].describe())
-
-print("[INFO] Direction score summary:")
-print(final_df["direction_score"].describe())
-
-print("[INFO] Direction score standard deviation summary:")
-print(final_df["direction_score_std"].describe())
-
-print("[INFO] Top 10 sites by absolute direction score:")
-print(
-    final_df[
+    merged_df["pred_direction_by_score"] = np.select(
         [
-            "INDEX",
-            "known_direction_norm",
-            "mean_prob_functional",
-            "mean_prob_import",
-            "mean_prob_export",
-            "direction_raw",
-            "direction_raw_std",
-            "direction_score",
-            "direction_score_std",
-            "direction_abs_score",
-            "pred_direction_by_score",
-        ]
-    ].head(10)
-)
+            merged_df["direction_score"] > 0,
+            merged_df["direction_score"] < 0,
+        ],
+        [
+            "Nuclear Import",
+            "Nuclear Export",
+        ],
+        default="Tie"
+    )
+
+    merged_df["functional_import_score"] = np.where(
+        merged_df["direction_score"] > 0,
+        merged_df["direction_score"],
+        0.0
+    )
+
+    merged_df["functional_export_score"] = np.where(
+        merged_df["direction_score"] < 0,
+        -merged_df["direction_score"],
+        0.0
+    )
+
+    front_cols = [
+        "INDEX",
+        "ACC_ID",
+        "POSITION",
+        "functional_MOD_RSD",
+        "known_status",
+        "known_direction_norm",
+        "mean_prob_functional",
+        "std_prob_functional",
+        "functional_selected",
+        "functional_final_threshold",
+        "functional_pred_label",
+        "mean_prob_import",
+        "std_prob_import",
+        "mean_prob_export",
+        "std_prob_export",
+        "direction_raw",
+        "direction_raw_std",
+        "direction_score",
+        "direction_score_std",
+        "direction_score_mu",
+        "direction_score_sigma",
+        "direction_score_global_median",
+        "vote_import",
+        "vote_export",
+        "stable_predicted_import",
+        "stable_predicted_export",
+        "stable_predicted_direction",
+        "direction_abs_score",
+        "direction_margin_raw",
+        "pred_direction_by_score",
+        "functional_import_score",
+        "functional_export_score",
+        "functional_prob_fold_1",
+        "functional_prob_fold_2",
+        "functional_prob_fold_3",
+        "functional_prob_fold_4",
+        "functional_prob_fold_5",
+    ]
+
+    front_cols = front_cols + direction_raw_fold_cols + direction_score_fold_cols
+
+    known_annotation_cols = [
+        col for col in merged_df.columns
+        if col.startswith("known_") and col not in front_cols
+    ]
+
+    front_cols = front_cols + known_annotation_cols
+    front_cols = [col for col in front_cols if col in merged_df.columns]
+    front_cols = list(dict.fromkeys(front_cols))
+
+    other_cols = [col for col in merged_df.columns if col not in front_cols]
+
+    final_df = merged_df[front_cols + other_cols].copy()
+    final_df = final_df.loc[:, ~final_df.columns.duplicated()].copy()
+
+    final_df = final_df.sort_values(
+        by=["direction_abs_score", "mean_prob_functional"],
+        ascending=[False, False]
+    )
+
+    final_df.to_csv(output_csv, index=False)
+
+    stable_import_df = final_df.loc[final_df["stable_predicted_import"]].copy()
+    stable_export_df = final_df.loc[final_df["stable_predicted_export"]].copy()
+    stable_combined_df = final_df.loc[
+        final_df["stable_predicted_import"] | final_df["stable_predicted_export"]
+    ].copy()
+
+    stable_import_df = stable_import_df.sort_values(
+        by=["direction_score_mu", "vote_import", "mean_prob_functional"],
+        ascending=[False, False, False],
+    )
+    stable_export_df = stable_export_df.sort_values(
+        by=["direction_score_mu", "vote_export", "mean_prob_functional"],
+        ascending=[True, False, False],
+    )
+    stable_combined_df = stable_combined_df.sort_values(
+        by=["stable_predicted_direction", "direction_abs_score", "mean_prob_functional"],
+        ascending=[True, False, False],
+    )
+
+    stable_rule_summary_df = build_stability_rule_summary(
+        final_df,
+        global_median,
+        import_mu_threshold,
+        export_mu_threshold,
+    )
+
+    stable_import_df.to_csv(stable_import_output_csv, index=False)
+    stable_export_df.to_csv(stable_export_output_csv, index=False)
+    stable_combined_df.to_csv(stable_combined_output_csv, index=False)
+    stable_rule_summary_df.to_csv(stable_rule_summary_csv, index=False)
+
+    plot_direction_score_signed_scatter_known_direction(
+        final_df,
+        direction_score_fold_cols,
+        scatter_output_png,
+        import_mu_threshold=import_mu_threshold,
+        export_mu_threshold=export_mu_threshold,
+    )
+
+    print(f"[DONE] Saved output to: {output_csv}")
+    print(f"[DONE] Saved stable import sites to: {stable_import_output_csv}")
+    print(f"[DONE] Saved stable export sites to: {stable_export_output_csv}")
+    print(f"[DONE] Saved stable combined sites to: {stable_combined_output_csv}")
+    print(f"[DONE] Saved stability rule summary to: {stable_rule_summary_csv}")
+    print(f"[DONE] Saved scatter plot to: {scatter_output_png}")
+    print(f"[INFO] Number of final scored sites: {len(final_df)}")
+    print(f"[INFO] Number of stable import sites: {len(stable_import_df)}")
+    print(f"[INFO] Number of stable export sites: {len(stable_export_df)}")
+    print(f"[INFO] Number of stable combined sites: {len(stable_combined_df)}")
+    print(f"[INFO] Global direction score median: {global_median}")
+    print(f"[INFO] Number of sites missing functional probability: {missing_functional_n}")
+    print(f"[INFO] Functional probability threshold: {functional_score_threshold}")
+    print(f"[INFO] Stability import rule: mu >= {import_mu_threshold}, vote_import >= {min_vote}, mu > global_median")
+    print(f"[INFO] Stability export rule: mu < {export_mu_threshold}, vote_export >= {min_vote}, mu < global_median")
+    print(f"[INFO] Import probability columns: {len(import_prob_cols)}")
+    print(f"[INFO] Export probability columns: {len(export_prob_cols)}")
+    print(f"[INFO] Matched seed fold pairs: {len(common_seed_fold_keys)}")
+    print(f"[INFO] Per-fold direction score columns: {len(direction_score_fold_cols)}")
+
+    print("[INFO] Stable predicted direction counts:")
+    print(final_df["stable_predicted_direction"].value_counts())
+
+    print("[INFO] Stability rule count summary:")
+    print(stable_rule_summary_df)
+
+    print("[INFO] Known direction counts:")
+    print(final_df["known_direction_norm"].fillna("Unknown").value_counts())
+
+    print("[INFO] Predicted direction counts:")
+    print(final_df["pred_direction_by_score"].value_counts())
+
+    print("[INFO] Direction raw summary:")
+    print(final_df["direction_raw"].describe())
+
+    print("[INFO] Direction score summary:")
+    print(final_df["direction_score"].describe())
+
+    print("[INFO] Direction score standard deviation summary:")
+    print(final_df["direction_score_std"].describe())
+
+    print("[INFO] Top 10 sites by absolute direction score:")
+    print(
+        final_df[
+            [
+                "INDEX",
+                "known_direction_norm",
+                "mean_prob_functional",
+                "mean_prob_import",
+                "mean_prob_export",
+                "direction_raw",
+                "direction_raw_std",
+                "direction_score",
+                "direction_score_std",
+                "direction_abs_score",
+                "pred_direction_by_score",
+            ]
+        ].head(10)
+    )
+
+
+if __name__ == "__main__":
+    main()
