@@ -170,6 +170,16 @@ The finalized training runs are recorded below.
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.
 
+## Tests
+
+Lightweight regression tests are stored under [`tests/`](tests/). After installing the project dependencies, run:
+
+```bash
+python -m unittest discover -s tests
+```
+
+The tests focus on input preprocessing, group-aware splits, and script entry points; they do not require model artifacts or large data bundles.
+
 ## Documentation
 
 | Resource | Description |
