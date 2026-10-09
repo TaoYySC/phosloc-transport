@@ -99,7 +99,7 @@ cd functional
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \
-  --output_tag "ESM Window+Site+PDB"
+  --output_tag "ESM Window+Site+PDB_147pos_roc08_v11_xlarge"
 ```
 
 ### Train import vs. export
@@ -108,15 +108,20 @@ python scripts/1_1_run_experiment.py \
 cd import_export
 
 python scripts/run_import_export_experiment.py \
-  --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \
-  --output_tag esm_window_only_supcon_ce_import_pos
+  --experiment_cfg configs/experiments/import_export_ie147_D3_kpls_gauto.yaml \
+  --output_tag ie147_R3D_D3_kpls_gauto
 ```
 
 ### Run CPTAC phospho-hotspot validation
 
-Manuscript Stage 3 is **hotspot-level** (Mixed / Predicted-candidate catalog; pure nuclear / pure cytoplasmic gates; `mean_z` activity). Figure 5 uses a **four-arm, two-sided** scan (Import/Export × activate/repress).
+Manuscript Stage 3 is **hotspot-level** via `build_hotspots_mixed_pred_filter.py` (adj≤15, span≤40; Mixed / Predicted-candidate; pure nuclear / pure cytoplasmic gates; `mean_z` activity). Figure 5 uses a **four-arm, two-sided** scan (`regulon_only`).
 
-See **[cptac_analysis/README.md](cptac_analysis/README.md)** for data setup (`cptac_analysis/data/source/`), `pyensembl`, catalog rules, and commands. Panel-to-script map: [`docs/FIGURES_AND_PREDICTION.md`](docs/FIGURES_AND_PREDICTION.md). Supplemental Tables S3–S4: [`supplement/`](supplement/).
+```bash
+cd cptac_analysis
+bash scripts/run_four_arm_twosided_pipeline.sh
+```
+
+See **[cptac_analysis/README.md](cptac_analysis/README.md)** for data setup, catalog Methods rules, and full four-arm CLI. Panel-to-script map: [`docs/FIGURES_AND_PREDICTION.md`](docs/FIGURES_AND_PREDICTION.md). Supplemental Tables S3–S4: [`supplement/`](supplement/).
 
 ## Data availability
 
@@ -185,8 +190,8 @@ The finalized training runs are recorded below.
 
 | Pipeline | Original run |
 |----------|--------------|
-| Localization-Regulatory Classifier | `run_20260610_204935_ESM Window+Site+PDB` |
-| Localization Direction Classifier | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
+| Localization-Regulatory Classifier (147 / 868, v11) | `run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge` |
+| Localization Direction Classifier (D3 kernel-PLS) | `run_20260904_134712_ie147_R3D_D3_kpls_gauto` |
 | CPTAC hotspot (Fig. 5 four-arm, two-sided) | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.

@@ -65,11 +65,9 @@ PRESET_SITES: Dict[str, str] = {
   "AR_S647-T653": "ENSG00000169083|HS_P10275_H1_S647_T653",
 }
 DEFAULT_BATCH_SITE_LABELS = [
-  "STAT3_Y705",
-  "STAT3_S701",
-  "E2F4_S244",
-  "NFATC2_S53",
-  "HSF1_S326",
+  "STAT1_T699-S708",
+  "AR_S647-T653",
+  "CUX1_Y1209-S1218",
 ]
 
 # Match plot_activate_merged_across_cancers() in run_import_target_regulation_analysis.py

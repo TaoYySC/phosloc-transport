@@ -10,7 +10,6 @@ data:
 configs:
   split_cfg: configs/split.yaml
   feature_sets_cfg: configs/feature_sets.yaml
-  # Manuscript Stage 1 (147 pos / 868 neg after distance filter): v11 xlarge
   train_cfg: configs/train_roc08_v11_xlarge.yaml
 
 runtime:

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Build phospho-hotspot catalogs by distance-clustering Known/HC phosphosites.
 
+**Not the manuscript primary catalog.** Figure 5 / Stage 3 use
+`build_hotspots_mixed_pred_filter.py` (adj≤15, span≤40, Mixed / Predicted-candidate;
+no singletons as a keep rule). This script is retained for earlier distance
+catalogs and sensitivity comparisons only.
+
 Definition (anchor-only clustering):
   1) Clustering universe: Known and/or Predicted (HC) phosphosites from the
      FuncTransport summary table only — not unannotated / Cluster-only rows,

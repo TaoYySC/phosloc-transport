@@ -12,9 +12,10 @@ This subproject trains a binary classifier that predicts whether a transcription
 |-------|-------|
 | Task | Localization-regulatory phosphosite classification |
 | Feature set | `esm_graph` - ESM-2 local window (31), center-site embedding from the same window block, and AlphaFold local graph features |
-| Classifier | `esm_cnn2d_site_gnn` |
+| Classifier | `esm_cnn2d_site_gnn` (`train_roc08_v11_xlarge.yaml`) |
 | Window size | 31 |
-| Original run directory | `results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/` |
+| Training set | **147** positives / **868** negatives (after distance filter) |
+| Original run directory | `results/run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge/Functional_Transport/` |
 | Run metadata | [`configs/runs/esm_window_site_pdb_run_meta.json`](configs/runs/esm_window_site_pdb_run_meta.json) |
 
 ## Predict new sites
@@ -52,18 +53,19 @@ cd functional
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \
-  --output_tag "ESM Window+Site+PDB"
+  --output_tag "ESM Window+Site+PDB_147pos_roc08_v11_xlarge"
 ```
 
 ## Config files
 
 | File | Description |
 |------|-------------|
-| `configs/experiments/esm_window_site_pdb.yaml` | Experiment entry point: data paths, linked config files, and runtime settings (`device`, `output_dir`) |
+| `configs/experiments/esm_window_site_pdb.yaml` | Default experiment entry (points to v11 train config) |
+| `configs/train_roc08_v11_xlarge.yaml` | Manuscript `esm_cnn2d_site_gnn` hyperparameters |
 | `configs/split.yaml` | Predefined held-out test split and 5-fold stratified group cross-validation on the development set |
-| `configs/train.yaml` | `esm_cnn2d_site_gnn` architecture, optimization, and early-stopping settings |
-| `configs/feature_sets.yaml` | Feature block definitions used by `esm_graph`: ESM-2 window embeddings, center-site embedding derived by the loader, and AlphaFold graph inputs |
-| `configs/runs/esm_window_site_pdb_run_meta.json` | Snapshot of metrics, fold selection, and paths from the finalized run |
+| `configs/train.yaml` | Legacy narrower HPs (pre-v11) |
+| `configs/feature_sets.yaml` | Feature block definitions used by `esm_graph` |
+| `configs/runs/esm_window_site_pdb_run_meta.json` | Snapshot for the **147 / 868** v11 run |
 
 ## Data
 
@@ -77,14 +79,14 @@ Required prediction resources:
 | FASTA | `data/fasta/transcription_fasta.fasta` |
 | ESM embeddings | `data/TF_esm_embedding/` |
 | AlphaFold/PDB files | `data/alphafold_tf_pdb/` |
-| Model artifacts | `data/model_artifacts/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/artifacts/` |
+| Model artifacts | Zenodo pack → `data/model_artifacts/` or the v11 results `artifacts/` tree |
 
 ## Outputs
 
 Training writes model checkpoints, validation metrics, test metrics, and run metadata to the configured results directory (default: `results/`). The finalized run is stored at:
 
 ```text
-results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/
+results/run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge/Functional_Transport/
 ```
 
 Prediction writes ensemble probability tables to:

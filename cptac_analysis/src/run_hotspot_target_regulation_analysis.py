@@ -42,11 +42,11 @@ _REPO_ROOT = _CPTAC_ROOT.parent
 # Canonical pipeline: Known/HC-only clustering first, then CPTAC on those hotspots.
 DEFAULT_HOTSPOT_DIR = (
     _CPTAC_ROOT
-    / "results/import_target_regulation_hotspot_v11_147pos_d3_platt/hotspots"
+    / "results/import_target_regulation_hotspot_v11_147pos_d3_platt/hotspots_mixed_pred_filter_pure_direction"
 )
 DEFAULT_OUTPUT_DIR = (
     _CPTAC_ROOT
-    / "results/import_target_regulation_hotspot_v11_147pos_d3_platt_anchor_only"
+    / "results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/Import_activate/cptac"
 )
 
 DIRECTION_CALL_FOR = {
@@ -792,7 +792,7 @@ def parse_hotspot_args() -> argparse.Namespace:
     )
     parser.add_argument("mode", choices=["scan"], nargs="?", default="scan")
     parser.add_argument("--hotspot-dir", type=Path, default=DEFAULT_HOTSPOT_DIR)
-    parser.add_argument("--distance", type=int, default=10)
+    parser.add_argument("--distance", type=int, default=15)
     parser.add_argument(
         "--activity",
         choices=VALID_ACTIVITY_MODES,
@@ -826,7 +826,7 @@ def parse_hotspot_args() -> argparse.Namespace:
     parser.add_argument("--chip-threshold", type=float, default=200.0)
     parser.add_argument("--min-chip-sample-frac", type=float, default=0.1)
     parser.add_argument("--chip-top-n", type=int, default=500)
-    parser.add_argument("--signed-target-mode", default="chip_intersection")
+    parser.add_argument("--signed-target-mode", default="regulon_only")
     parser.add_argument("--phospho-group-frac", type=float, default=0.08)
     parser.add_argument("--phospho-split-mode", default="median_nonmissing")
     parser.add_argument("--min-group-samples", type=int, default=3)
@@ -847,7 +847,7 @@ def parse_hotspot_args() -> argparse.Namespace:
     parser.add_argument(
         "--test-alternative",
         choices=["directional", "two-sided"],
-        default="directional",
+        default="two-sided",
         help=(
             "Wilcoxon alternative for High vs Low: directional (one-sided hypothesis) "
             "or two-sided."

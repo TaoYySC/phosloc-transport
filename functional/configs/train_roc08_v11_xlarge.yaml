@@ -1,0 +1,39 @@
+# Aggressive width bump (~2.5–3x v6); slightly lower LR / batch for stability.
+selected_model: esm_cnn2d_site_gnn
+
+models:
+  esm_cnn2d_site_gnn:
+    input_keys: [esm, af_graph]
+
+    input_dim: 1280
+    proj_input_dim: 1024
+    conv_channels: [576, 288]
+    seq_kernel_size: 5
+    encoder_output_dim: 144
+
+    site_hidden_dims: [1152, 576]
+    site_output_dim: 144
+
+    gnn_node_input_dim: 23
+    gnn_hidden_dim: 144
+    gnn_output_dim: 144
+    # Historical checkpoints prove the original V11 run used 4 heads; the
+    # model builder at that time ignored the YAML value 8.
+    gnn_heads: 4
+
+    fusion_hidden_dims: [224, 112]
+
+    dropout: 0.14
+    lr: 0.00028
+    weight_decay: 0.0012
+    batch_size: 28
+    num_epochs: 160
+    loss_type: bce
+    pos_weight: auto
+    early_stopping: true
+    early_stopping_metric: val_auroc
+    early_stopping_patience: 25
+    early_stopping_min_delta: 0.0
+    early_stopping_min_epochs: 40
+    val_eval_interval: 1
+    save_train_predictions: false

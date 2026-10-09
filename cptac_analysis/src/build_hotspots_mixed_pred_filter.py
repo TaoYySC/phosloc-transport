@@ -25,7 +25,7 @@ import pandas as pd
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_SUMMARY = (
     REPO
-    / "import_export/results"
+    / "import_export/data/precomputed/1_transport_classifier_results"
     / "tf_phos_site_FuncTransport_Direction_summary_with_PMID_annotation_v11_147pos_d3_platt.csv"
 )
 DEFAULT_OUT = (

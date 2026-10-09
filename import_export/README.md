@@ -12,12 +12,13 @@ This subproject trains a binary classifier that predicts **nuclear accumulation 
 |-------|-------|
 | Task | Localization direction classification: nuclear accumulation vs. cytoplasmic redistribution |
 | Label convention | Legacy labels: Import = 1, Export = 0 |
-| Feature set | `esm_window_only_supcon_ce` - ESM-2 local window (21) with PLS-reduced window embeddings |
-| Output tag | `esm_window_only_supcon_ce_import_pos` |
-| Model | `supcon_ce` with supervised contrastive loss and cross-entropy loss |
-| Window size | 21 |
-| Original run directory | `results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/` |
-| Run metadata | [`configs/runs/esm_window_only_supcon_ce_import_pos_run_meta.json`](configs/runs/esm_window_only_supcon_ce_import_pos_run_meta.json) |
+| Feature set | ESM window-41 + site, **kernel-PLS** (D3; feature key still named `esm_window_only_supcon_ce`) |
+| Output tag | `ie147_R3D_D3_kpls_gauto` |
+| Model | `supcon_ce` on D3 reduced features |
+| Window size | 41 |
+| Labeled sites | **147** Import/Export positives |
+| Original run directory | `results/run_20260904_134712_ie147_R3D_D3_kpls_gauto/Import_vs_Export/` |
+| Run metadata | [`configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json`](configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json) |
 
 ## Predict new sites
 
@@ -28,9 +29,9 @@ cd import_export
 
 python scripts/predict_import_export_direction.py \
   --input_csv ../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
-  --output_csv results/1_transport_classifier_results/esm_window_only_import_pos_predictions/custom_import_export_predictions.csv \
+  --output_csv results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/custom_import_export_predictions.csv \
   --device cpu \
-  --save_dropped_csv results/1_transport_classifier_results/esm_window_only_import_pos_predictions/custom_dropped_rows.csv
+  --save_dropped_csv results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/custom_dropped_rows.csv
 ```
 
 Important options:
@@ -56,19 +57,17 @@ Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_ex
 
 ## Joint score and stable predictions
 
-`scripts/calculate_joint_direction_score.py` combines Localization-Regulatory Classifier ensemble scores with direction predictions. The stable prediction files used by feature-panel plots and the CPTAC validation are stored under:
+`scripts/calculate_joint_direction_score.py` combines Localization-Regulatory Classifier ensemble scores with direction predictions. Defaults point at the **v11 + D3 + Platt** inputs. Manuscript-aligned stable tables live under:
 
 ```text
-data/precomputed/1_transport_classifier_results/joint_score/
+data/precomputed/1_transport_classifier_results/joint_score_v11_147pos_d3_platt/
 ```
 
-The script can be run with defaults or explicit paths:
+Export stability uses `direction_score_mu <=` known-export threshold (aligned with Methods), plus ≥4 fold votes and `mu <` global median.
 
 ```bash
+# Defaults already target v11 functional + D3 Platt direction predictions
 python scripts/calculate_joint_direction_score.py \
-  --functional_csv ../functional/data/precomputed/2_1_functional_classifier_results/predictions/esm_window_site_pdb_5_folds_ensemble_predictions.csv \
-  --import_export_csv data/precomputed/1_transport_classifier_results/esm_window_only_import_pos_predictions/tf_all_phos_site_predictions_per_fold.csv \
-  --output_dir results/1_transport_classifier_results/joint_score \
   --functional_score_threshold 0.6 \
   --min_vote 4
 ```
@@ -81,19 +80,19 @@ The reference stable files use probability and fold-vote filters encoded in the 
 cd import_export
 
 python scripts/run_import_export_experiment.py \
-  --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \
-  --output_tag esm_window_only_supcon_ce_import_pos
+  --experiment_cfg configs/experiments/import_export_ie147_D3_kpls_gauto.yaml \
+  --output_tag ie147_R3D_D3_kpls_gauto
 ```
 
 ## Config files
 
 | File | Description |
 |------|-------------|
-| `configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml` | Experiment entry point: data paths, linked config files, and runtime settings (`device`, `output_dir`) |
-| `configs/split.yaml` | 5-fold stratified group cross-validation on annotated direction-labeled transport-positive sites |
-| `configs/train_supcon_ce_window_only.yaml` | `supcon_ce` architecture, SupCon+CE optimization, and training settings |
-| `configs/feature_sets_esm_window_only_supcon_ce.yaml` | Feature block definitions used by `esm_window_only_supcon_ce`: ESM-2 window embeddings with PLS reduction |
-| `configs/runs/esm_window_only_supcon_ce_import_pos_run_meta.json` | Snapshot of metrics, fold selection, and paths from the finalized run |
+| `configs/experiments/import_export_ie147_D3_kpls_gauto.yaml` | **Default** manuscript experiment (D3 kernel-PLS) |
+| `configs/feature_sets_d3_kpls_gauto.yaml` / `train_d3_kpls_gauto.yaml` | D3 features and SupCon+CE HPs |
+| `configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json` | Snapshot from the finalized D3 run |
+| `configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml` | Legacy PLS-64 / window-21 baseline |
+| `configs/split.yaml` | 5-fold stratified group cross-validation |
 
 ## Data
 
@@ -106,21 +105,21 @@ Required prediction resources:
 | Input site CSV | `../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv` |
 | FASTA | `data/fasta/transcription_fasta.fasta` |
 | ESM embeddings | `data/TF_esm_embedding/` |
-| Model artifacts | `data/model_artifacts/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/` |
-| Platt calibrator | `data/model_artifacts/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/platt_calibrator.json` |
+| Model artifacts | Zenodo pack → D3 run `fold_artifacts/` under `results/run_20260904_134712_ie147_R3D_D3_kpls_gauto/` |
+| Platt calibrator | Beside D3 prediction outputs (`d3_kpls_gauto_predictions_platt/`) |
 
 ## Outputs
 
 Training writes model checkpoints, fold-level metrics, cross-validation summaries, and run metadata to the configured results directory (default: `results/`). The finalized run is stored at:
 
 ```text
-results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/
+results/run_20260904_134712_ie147_R3D_D3_kpls_gauto/Import_vs_Export/
 ```
 
 Prediction writes ensemble and per-fold tables to:
 
 ```text
-results/1_transport_classifier_results/esm_window_only_import_pos_predictions/
+results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/
 ```
 
 ## Notes and limitations

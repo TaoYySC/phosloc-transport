@@ -58,34 +58,32 @@ python scripts/predict_import_export_direction.py --device cpu
 
 All paths are relative to `cptac_analysis/`. Requires `pyensembl` and a populated `data/source/` directory (see [cptac_analysis/data/README.md](../cptac_analysis/data/README.md)).
 
-**Manuscript primary analysis is hotspot-level.** Figure 4 covers spatial / direction
-definition (4A–C) and CPTAC association panels; Figure 5 is the four-arm two-sided
-concordance heatmap. Supp. Fig. 2e enrichment stars use **unadjusted permutation P**
-(`* P < 0.05`); BH q values are listed in Table S3.
+**Manuscript primary analysis is hotspot-level** (`build_hotspots_mixed_pred_filter.py`).
+Figure **4A–C** covers spatial / direction definition; Figure **5** is the four-arm
+two-sided CPTAC scan (heatmap + concordance). Per-arm association drafts still call
+`plot_hotspot_figure4.py` (historical script name). Supp. Fig. 2e enrichment stars use
+**unadjusted permutation P** (`* P < 0.05`); BH q values are listed in Table S3.
 
 | Panel / output | Script | Main inputs | Output directory |
 |----------------|--------|-------------|------------------|
-| Hotspot catalog (Mixed/Predicted) | `build_hotspots_mixed_pred_filter.py` | FuncTransport+Direction summary (v11) | `results/.../hotspots_mixed_pred_filter/` |
+| Hotspot catalog (Mixed/Predicted; **Methods**) | `build_hotspots_mixed_pred_filter.py` | FuncTransport+Direction summary (v11) | `results/.../hotspots_mixed_pred_filter/` |
 | Pure nuclear/cyto gates | `reannotate_hotspot_pure_direction.py` | mixed_pred_filter catalog | `.../hotspots_mixed_pred_filter_pure_direction/` |
-| CPTAC hotspot scan | `run_hotspot_target_regulation_analysis.py` | pure-direction catalog, `data/source/` | per-arm trees under `results/hotspot_*` |
-| Figure **4b–4f** | `plot_hotspot_figure4.py` | hotspot CPTAC results | `results/hotspot_mixed_pred_filter_pure_mean_z_median_20260914/figure4/` |
+| CPTAC hotspot scan (regulon_only, two-sided) | `run_hotspot_target_regulation_analysis.py` / `run_four_arm_twosided_pipeline.sh` | pure-direction catalog, `data/source/` | `results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` |
 | Figure **4A–C** / S5 | `run_figure4_spatial_direction_panels.py` | summary + mixed_pred_filter catalog | `results/figure4_spatial_direction_panels_v11_147pos_d3_platt/` |
-| Figure **5** four-arm heatmap | `plot_two_sided_four_arm_significance_heatmap.py` | two-sided four-arm results | `results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/combined_four_arm_heatmap/` |
+| Figure **5** four-arm heatmap | `plot_two_sided_four_arm_significance_heatmap.py` | two-sided four-arm results | `.../combined_four_arm_heatmap/` |
+| Figure **5b** concordance | `analyze_two_sided_concordance.py` | four-arm CPTAC tables | `.../concordance_direction_summary/` |
 | Table **S4** associations | `analyze_two_sided_concordance.py` | concordance flags CSV | `../supplement/Supplemental_Table_4.xlsx` |
 | Table **S3** co-regulatory enrichment | `../functional/scripts/plot_functional_validation_scores.py` | reported co-regulatory (cluster-sheet) sites | `../supplement/Supplemental_Table_3.xlsx` |
 | Hotspot Cox / KM | `run_hotspot_survival_cox.py` | BH-significant cancer×hotspot pairs | `results/survival_analysis/hotspot_cox_*` |
-| Legacy unit-site scan | `run_import_target_regulation_analysis.py` | predicted import sites | `results/import_target_regulation/` |
+| Legacy unit-site examples (STAT1 / AR / CUX1) | `plot_phosphosite_across_cancers.py` | unit-site CPTAC outputs | `results/phosphosite_across_cancers_boxplots/` |
 
 Example (catalog + Figure 5):
 
 ```bash
 cd cptac_analysis
-
-python scripts/build_hotspots_mixed_pred_filter.py
-python scripts/reannotate_hotspot_pure_direction.py
-python scripts/analyze_two_sided_concordance.py
-python scripts/plot_two_sided_four_arm_significance_heatmap.py
+bash scripts/run_four_arm_twosided_pipeline.sh
+# or the explicit four-arm CLI in cptac_analysis/README.md
 python scripts/run_figure4_spatial_direction_panels.py
 ```
 
-See [cptac_analysis/README.md](../cptac_analysis/README.md) for catalog rules, Figure 5b counts, and legacy unit-site commands.
+See [cptac_analysis/README.md](../cptac_analysis/README.md) for Methods catalog rules, Figure 5b counts, and legacy unit-site commands.

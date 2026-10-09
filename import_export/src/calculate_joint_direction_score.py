@@ -42,18 +42,20 @@ DEFAULT_FUNCTIONAL_CSV = (
     FUNCTIONAL_PRECOMPUTED
     / "2_1_functional_classifier_results"
     / "predictions"
-    / "esm_window_site_pdb_5_folds_ensemble_predictions.csv"
+    / "v11_147pos_5_folds_ensemble_predictions.csv"
 )
 DEFAULT_IMPORT_EXPORT_CSV = (
     DATA_PRECOMPUTED
     / "1_transport_classifier_results"
-    / "esm_window_only_import_pos_predictions"
+    / "d3_kpls_gauto_predictions_platt"
     / "tf_all_phos_site_predictions_per_fold.csv"
 )
 DEFAULT_KNOWN_POSITIVE_CSV = (
     FUNCTIONAL_ROOT / "data" / "dataset_phos_site" / "TF_positive_phos_site_0608.csv"
 )
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "1_transport_classifier_results" / "joint_score"
+DEFAULT_OUTPUT_DIR = (
+    PROJECT_ROOT / "results" / "1_transport_classifier_results" / "joint_score_v11_147pos_d3_platt"
+)
 DEFAULT_MERGE_MODE = "matched_only"
 DEFAULT_FUNCTIONAL_SCORE_THRESHOLD = 0.6
 
@@ -322,7 +324,7 @@ def apply_stability_filter(
     )
 
     df["stable_predicted_export"] = (
-        (df["direction_score_mu"] < export_mu_threshold)
+        (df["direction_score_mu"] <= export_mu_threshold)
         & (df["vote_export"] >= min_vote)
         & (df["direction_score_mu"] < global_median)
     )
@@ -365,7 +367,7 @@ def build_stability_rule_summary(
         )
 
         export_mask = (
-            (df["direction_score_mu"] < export_mu_threshold)
+            (df["direction_score_mu"] <= export_mu_threshold)
             & (df["vote_export"] >= vote_threshold)
             & (df["direction_score_mu"] < global_median)
         )
@@ -878,7 +880,7 @@ def main(argv=None):
     print(
         f"[INFO] Known-positive direction score thresholds: "
         f"import_mu >= {import_mu_threshold:.6f} (min known import), "
-        f"export_mu < {export_mu_threshold:.6f} (max known export)"
+        f"export_mu <= {export_mu_threshold:.6f} (max known export)"
     )
 
     merged_df, global_median = apply_stability_filter(
@@ -1033,7 +1035,7 @@ def main(argv=None):
     print(f"[INFO] Number of sites missing functional probability: {missing_functional_n}")
     print(f"[INFO] Functional probability threshold: {functional_score_threshold}")
     print(f"[INFO] Stability import rule: mu >= {import_mu_threshold}, vote_import >= {min_vote}, mu > global_median")
-    print(f"[INFO] Stability export rule: mu < {export_mu_threshold}, vote_export >= {min_vote}, mu < global_median")
+    print(f"[INFO] Stability export rule: mu <= {export_mu_threshold}, vote_export >= {min_vote}, mu < global_median")
     print(f"[INFO] Import probability columns: {len(import_prob_cols)}")
     print(f"[INFO] Export probability columns: {len(export_prob_cols)}")
     print(f"[INFO] Matched seed fold pairs: {len(common_seed_fold_keys)}")
