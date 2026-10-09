@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Command-line wrapper for combined significant-site CPTAC boxplots."""
+"""Command-line wrapper for plot_significant_sites_combined."""
 
 from pathlib import Path
 import sys

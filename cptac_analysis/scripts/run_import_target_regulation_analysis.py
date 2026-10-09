@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Command-line wrapper for the CPTAC target-regulation analysis pipeline."""
+"""Command-line wrapper for run_import_target_regulation_analysis."""
 
 from pathlib import Path
 import sys

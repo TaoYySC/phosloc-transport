@@ -3,8 +3,8 @@
 Simplified TEMPO target regulation boxplot pipeline.
 
 For each cancer type and transport direction, this script:
-1. Loads stable predicted transport phosphosites from 1_5 joint_score
-   (mean_prob_functional >= 0.6, vote >= 4; five-fold functional ensemble).
+1. Loads stable predicted transport phosphosites from joint_score_v11_147pos_d3_platt
+   (mean_prob_functional >= 0.6, vote >= 4; D3 + Platt direction scores).
 2. Matches predicted sites to cancer phosphoproteomics data.
 3. Maps each site to its TF gene symbol.
 4. Selects ChIP-supported target genes for the TF.
@@ -80,7 +80,13 @@ DEFAULT_CANCER_LIST = [
 ]
 DEFAULT_DIRECTIONS = ["Nuclear Import"]
 VALID_DIRECTIONS = ["Nuclear Import", "Nuclear Export"]
-VALID_PHOSPHO_SPLIT_MODES = ["quantile_extreme", "observed_missing", "median_nonmissing", "both"]
+VALID_PHOSPHO_SPLIT_MODES = [
+    "quantile_extreme",
+    "observed_missing",
+    "median_nonmissing",
+    "detected_median",
+    "both",
+]
 VALID_CONFOUNDER_ANALYSES = ["none", "diagnostic", "ratio", "adjusted", "full"]
 VALID_PHOSPHO_VALUE_MODES = ["site_abundance", "phospho_minus_protein"]
 VALID_ABUNDANCE_PRIMARY_MODES = ["unadjusted", "residual", "dual"]
@@ -293,7 +299,7 @@ class TempoConfig:
     idmapping_path: str = str(_CPTAC_ROOT / "data/source/3.idmapping/HUMAN_9606_idmapping.dat")
     prediction_output_dir: str = str(
         _REPO_ROOT
-        / "import_export/data/precomputed/1_transport_classifier_results/joint_score"
+        / "import_export/results/1_transport_classifier_results/joint_score_v11_147pos_d3_platt"
     )
     import_prediction_filename: str = "predicted_import_stable_gt0p6_vote4.csv"
     export_prediction_filename: str = "predicted_export_stable_gt0p6_vote4.csv"
@@ -318,6 +324,9 @@ class TempoConfig:
     phospho_split_mode: str = "median_nonmissing"
     min_group_samples: int = 3
     min_box_points: int = 3
+    # Minimum paired target genes required to run site-level Wilcoxon; below this
+    # the association is marked not_evaluable and gets no P / BH q.
+    min_targets_for_wilcoxon: int = 10
     exclude_zero_phospho_for_split: bool = False
     dpi: int = 300
     random_iterations: int = 100
@@ -331,6 +340,12 @@ class TempoConfig:
     purity_column: str = "WES_purity"
     min_samples_for_adjustment: int = 10
     use_bh_pvalue_correction: bool = True
+    # "directional": one-sided Wilcoxon by Import/Export × activate/repress hypothesis
+    # "two-sided": two-sided Wilcoxon (no direction assumption)
+    test_alternative: str = "directional"
+    # When True, figure panels / BH-sig tables keep only hypothesis-concordant deltas
+    # (auto-enabled for two-sided runs in plot_hotspot_figure4).
+    require_expected_direction: bool = False
 
     def cancer_paths(self, cancer_type: str) -> Dict[str, str]:
         base = self.linkedomics_base
@@ -755,13 +770,23 @@ class TargetRegulationBoxplotPipeline:
         gene_ids: Sequence[str],
         tf_gene_id: str,
         samples: Sequence[str],
+        fit_samples: Optional[Sequence[str]] = None,
     ) -> pd.DataFrame:
-        sample_list = list(samples)
+        """TF-adjust target expression; residuals returned for ``samples``.
+
+        If ``fit_samples`` is given, the regression is fit only on that subset
+        (e.g. Detected High/Low), then applied to ``samples`` (which may also
+        include Undetected for out-of-sample residuals). When omitted, fit and
+        apply use the same ``samples`` list (legacy behavior).
+        """
+        sample_list = [str(s) for s in samples]
+        fit_list = [str(s) for s in fit_samples] if fit_samples is not None else list(sample_list)
+        cov_samples = list(dict.fromkeys(fit_list + sample_list))
         covariate_frame = self._build_tf_adjustment_covariate_frame(
             tf_gene_id,
             df_rna,
             df_protein,
-            sample_list,
+            cov_samples,
         )
         covariate_names = list(covariate_frame.columns)
         if not covariate_names:
@@ -774,9 +799,9 @@ class TargetRegulationBoxplotPipeline:
             if gene_id not in df_rna.index:
                 residual_rows[gene_id] = pd.Series(index=sample_list, dtype=float)
                 continue
-            y = pd.to_numeric(df_rna.loc[gene_id, sample_list], errors="coerce")
-            design = covariate_frame.copy()
-            design["y"] = y
+            y = pd.to_numeric(df_rna.loc[gene_id, cov_samples], errors="coerce")
+            design = covariate_frame.reindex(fit_list).copy()
+            design["y"] = y.reindex(fit_list)
             design = design.dropna()
             if len(design) < min_samples:
                 residual_rows[gene_id] = pd.Series(index=sample_list, dtype=float)
@@ -793,8 +818,8 @@ class TargetRegulationBoxplotPipeline:
             if rank < x_matrix.shape[1]:
                 residual_rows[gene_id] = pd.Series(index=sample_list, dtype=float)
                 continue
-            full_design = covariate_frame.copy()
-            full_design["y"] = y
+            full_design = covariate_frame.reindex(sample_list).copy()
+            full_design["y"] = y.reindex(sample_list)
             full_design = full_design.dropna()
             if full_design.empty:
                 residual_rows[gene_id] = pd.Series(index=sample_list, dtype=float)
@@ -937,7 +962,8 @@ class TargetRegulationBoxplotPipeline:
                 stats["n_observed_samples"].ge(min_group_samples)
                 & stats["n_missing_samples"].ge(min_group_samples)
             )
-        elif split_mode == "median_nonmissing":
+        elif split_mode in {"median_nonmissing", "detected_median"}:
+            # detected_median: same Detected High/Low gate as median; Undetected is optional third class
             high_counts = []
             low_counts = []
             for _, values in df_numeric.iterrows():
@@ -1218,7 +1244,7 @@ class TargetRegulationBoxplotPipeline:
             )
             return out
 
-        if self.config.phospho_split_mode == "median_nonmissing":
+        if self.config.phospho_split_mode in {"median_nonmissing", "detected_median"}:
             median_value = float(phospho_values.median())
             low_values = phospho_values[phospho_values < median_value]
             high_values = phospho_values[phospho_values >= median_value]
@@ -1233,11 +1259,17 @@ class TargetRegulationBoxplotPipeline:
                         "n_low_samples": int(len(low_values)),
                         "n_high_samples": int(len(high_values)),
                         "median_cutoff": median_value,
+                        "undetected_samples": list(missing_samples)
+                        if self.config.phospho_split_mode == "detected_median"
+                        else [],
+                        "n_undetected_samples": int(len(missing_samples))
+                        if self.config.phospho_split_mode == "detected_median"
+                        else 0,
                     }
                 )
                 return out
 
-            return {
+            out = {
                 "status": "success",
                 "low_samples": low_values.index.tolist(),
                 "high_samples": high_values.index.tolist(),
@@ -1252,7 +1284,14 @@ class TargetRegulationBoxplotPipeline:
                 "low_mean_phospho": float(low_values.mean()) if len(low_values) else np.nan,
                 "high_mean_phospho": float(high_values.mean()) if len(high_values) else np.nan,
                 "phospho_split_mode": self.config.phospho_split_mode,
+                "undetected_samples": [],
+                "n_undetected_samples": 0,
             }
+            if self.config.phospho_split_mode == "detected_median":
+                # Undetected = no valid phospho/activity value (all hotspot members missing)
+                out["undetected_samples"] = list(missing_samples)
+                out["n_undetected_samples"] = int(len(missing_samples))
+            return out
 
         if self.config.phospho_split_mode != "quantile_extreme":
             raise ValueError(f"Unsupported phospho split mode: {self.config.phospho_split_mode}")
@@ -1363,20 +1402,29 @@ class TargetRegulationBoxplotPipeline:
             base_summary["status"] = split_info["status"]
             return [], base_summary
 
-        if df_chip.empty:
-            base_summary["status"] = "no_chip_data"
-            return [], base_summary
-
-        chip_targets = self.classify_chip_targets(df_chip)
-        base_summary["n_chip_targets"] = int(len(chip_targets))
-        if chip_targets.empty:
-            base_summary["status"] = "no_chip_targets_after_filter"
-            return [], base_summary
-
-        chip_target_names = chip_targets["target"].dropna().astype(str).tolist()
+        # Target gene screening:
+        # - chip_intersection: ChIP filter → ∩ CollecTRI
+        # - regulon_only: CollecTRI only (no ChIP requirement)
+        chip_targets = pd.DataFrame(columns=["target", "target_upper"])
+        chip_target_names: List[str] = []
         if self.config.signed_target_mode == "chip_intersection":
+            if df_chip.empty:
+                base_summary["status"] = "no_chip_data"
+                return [], base_summary
+            chip_targets = self.classify_chip_targets(df_chip)
+            base_summary["n_chip_targets"] = int(len(chip_targets))
+            if chip_targets.empty:
+                base_summary["status"] = "no_chip_targets_after_filter"
+                return [], base_summary
+            chip_target_names = chip_targets["target"].dropna().astype(str).tolist()
             signed_targets = self.get_signed_targets_for_tf(tf_name, chip_target_names)
         elif self.config.signed_target_mode == "regulon_only":
+            if not df_chip.empty:
+                chip_targets = self.classify_chip_targets(df_chip)
+                base_summary["n_chip_targets"] = int(len(chip_targets))
+                chip_target_names = chip_targets["target"].dropna().astype(str).tolist()
+            else:
+                base_summary["n_chip_targets"] = 0
             signed_targets = self.get_signed_targets_for_tf(tf_name, None)
         else:
             raise ValueError(f"Unsupported signed_target_mode: {self.config.signed_target_mode}")
@@ -1403,8 +1451,20 @@ class TargetRegulationBoxplotPipeline:
 
         low_samples = split_info["low_samples"]
         high_samples = split_info["high_samples"]
+        undetected_samples = list(split_info.get("undetected_samples") or [])
+        n_undetected = int(split_info.get("n_undetected_samples", len(undetected_samples)))
+        include_undetected = (
+            self.config.phospho_split_mode == "detected_median"
+            and n_undetected >= self.config.min_group_samples
+        )
         target_gene_ids = target_info["gene_id"].astype(str).tolist()
-        valid_samples = list(dict.fromkeys(low_samples + high_samples))
+        # High/Low TF adjustment must match median: fit on Detected only.
+        detected_samples = list(dict.fromkeys(list(low_samples) + list(high_samples)))
+        apply_samples = list(
+            dict.fromkeys(
+                detected_samples + (undetected_samples if include_undetected else [])
+            )
+        )
 
         if expression_mode == EXPRESSION_MODE_TF_ADJUSTED:
             if df_protein is None:
@@ -1416,25 +1476,37 @@ class TargetRegulationBoxplotPipeline:
                 df_protein,
                 target_gene_ids,
                 tf_gene_id,
-                valid_samples,
+                apply_samples,
+                fit_samples=detected_samples,
             )
         else:
-            expr_matrix = df_rna.loc[target_gene_ids, valid_samples].apply(pd.to_numeric, errors="coerce")
+            expr_matrix = df_rna.loc[target_gene_ids, apply_samples].apply(
+                pd.to_numeric, errors="coerce"
+            )
 
         low_expression = expr_matrix.loc[target_gene_ids, low_samples].mean(axis=1)
         high_expression = expr_matrix.loc[target_gene_ids, high_samples].mean(axis=1)
+        und_expression = (
+            expr_matrix.loc[target_gene_ids, undetected_samples].mean(axis=1)
+            if include_undetected
+            else None
+        )
 
         rows: List[Dict[str, object]] = []
         chip_target_upper = set(chip_targets["target_upper"].dropna().astype(str))
+
+        group_specs = [
+            ("low", low_samples, low_expression),
+            ("high", high_samples, high_expression),
+        ]
+        if include_undetected and und_expression is not None:
+            group_specs.append(("undetected", undetected_samples, und_expression))
 
         for _, target_row in target_info.iterrows():
             gene_id = str(target_row["gene_id"])
             target_upper = str(target_row["target_upper"])
 
-            for phospho_group, samples, expression_values in [
-                ("low", low_samples, low_expression),
-                ("high", high_samples, high_expression),
-            ]:
+            for phospho_group, samples, expression_values in group_specs:
                 value = expression_values.get(gene_id, np.nan)
                 if pd.isna(value):
                     continue
@@ -1461,6 +1533,7 @@ class TargetRegulationBoxplotPipeline:
                         "n_samples_for_group_expression": int(len(samples)),
                         "n_low_samples": int(len(low_samples)),
                         "n_high_samples": int(len(high_samples)),
+                        "n_undetected_samples": int(n_undetected),
                         "low_cutoff": split_info["low_cutoff"],
                         "high_cutoff": split_info["high_cutoff"],
                         "median_cutoff": split_info.get("median_cutoff", np.nan),
@@ -1486,6 +1559,7 @@ class TargetRegulationBoxplotPipeline:
         base_summary["n_repress_expression_targets"] = target_info.loc[
             target_info["target_regulation"].eq("repress"), "gene_id"
         ].nunique()
+        base_summary["n_undetected_samples"] = int(n_undetected)
         base_summary["status"] = "success"
         return rows, base_summary
 
@@ -1711,12 +1785,24 @@ class TargetRegulationBoxplotPipeline:
                 out.loc[idx, q_col] = self._bh_adjust(out.loc[idx, p_col])
 
         out["significance_bh"] = out[q_col].map(self._p_to_stars)
+        # Preserve not-evaluable rows (n below min_targets_for_wilcoxon): no P/q.
+        if "evaluability_status" in out.columns:
+            not_eval = out["evaluability_status"].astype(str).eq("not_evaluable")
+            out.loc[not_eval, p_col] = np.nan
+            out.loc[not_eval, "wilcoxon_p_raw"] = np.nan
+            out.loc[not_eval, q_col] = np.nan
+            out.loc[not_eval, "significance_raw"] = "not_evaluable"
+            out.loc[not_eval, "significance_bh"] = "not_evaluable"
         if self.config.use_bh_pvalue_correction:
             out["significance"] = out["significance_bh"]
             out["wilcoxon_p_for_plot"] = out[q_col]
         else:
             out["significance"] = out["significance_raw"]
             out["wilcoxon_p_for_plot"] = out[p_col]
+        if "evaluability_status" in out.columns:
+            not_eval = out["evaluability_status"].astype(str).eq("not_evaluable")
+            out.loc[not_eval, "significance"] = "not_evaluable"
+            out.loc[not_eval, "wilcoxon_p_for_plot"] = np.nan
 
         return out
 
@@ -1747,10 +1833,10 @@ class TargetRegulationBoxplotPipeline:
             out["significance"] = out["significance_raw"]
         return out
     @staticmethod
-    def _expected_high_low_alternative(direction_short: str, target_regulation: str) -> str:
+    def _hypothesis_alternative(direction_short: str, target_regulation: str) -> str:
+        """Transport-hypothesis direction (always one-sided map), independent of test_alternative."""
         direction_short = str(direction_short).lower()
         target_regulation = str(target_regulation).lower()
-
         if direction_short == "import" and target_regulation == "activate":
             return "greater"
         if direction_short == "import" and target_regulation == "repress":
@@ -1761,9 +1847,13 @@ class TargetRegulationBoxplotPipeline:
             return "greater"
         return "two-sided"
 
-    @staticmethod
-    def _expected_high_low_text(direction_short: str, target_regulation: str) -> str:
-        alternative = TargetRegulationBoxplotPipeline._expected_high_low_alternative(
+    def _expected_high_low_alternative(self, direction_short: str, target_regulation: str) -> str:
+        if str(getattr(self.config, "test_alternative", "directional")).lower() == "two-sided":
+            return "two-sided"
+        return self._hypothesis_alternative(direction_short, target_regulation)
+
+    def _expected_high_low_text(self, direction_short: str, target_regulation: str) -> str:
+        alternative = self._expected_high_low_alternative(
             direction_short,
             target_regulation,
         )
@@ -1772,6 +1862,42 @@ class TargetRegulationBoxplotPipeline:
         if alternative == "less":
             return "High < Low"
         return "High vs Low"
+
+    def _delta_matches_hypothesis(
+        self,
+        direction_short: str,
+        target_regulation: str,
+        delta: object,
+    ) -> bool:
+        """Whether High−Low delta agrees with the transport hypothesis direction."""
+        if pd.isna(delta):
+            return False
+        alt = self._hypothesis_alternative(direction_short, target_regulation)
+        value = float(delta)
+        if alt == "greater":
+            return value > 0
+        if alt == "less":
+            return value < 0
+        return True
+
+    def _filter_hypothesis_concordant(
+        self,
+        df: pd.DataFrame,
+        *,
+        direction_short: Optional[str] = None,
+        target_regulation: Optional[str] = None,
+    ) -> pd.DataFrame:
+        """Keep rows whose delta matches the transport hypothesis."""
+        if df is None or df.empty:
+            return df
+        out = df.copy()
+        deltas = pd.to_numeric(out.get("delta_high_minus_low"), errors="coerce")
+        keep = []
+        for idx, row in out.iterrows():
+            d_short = direction_short if direction_short is not None else str(row.get("direction_short", ""))
+            reg = target_regulation if target_regulation is not None else str(row.get("target_regulation", ""))
+            keep.append(self._delta_matches_hypothesis(d_short, reg, deltas.loc[idx]))
+        return out.loc[keep].copy()
 
     @staticmethod
     def _directional_effect(delta: float, alternative: str) -> float:
@@ -2013,12 +2139,16 @@ class TargetRegulationBoxplotPipeline:
                 else pd.DataFrame()
             )
 
-            alternative = self._expected_high_low_alternative(direction_short, target_regulation)
+            # Site-level high/low comparison: require enough targets to evaluate.
+            # Tests use two-sided Wilcoxon when evaluable (n >= min_targets_for_wilcoxon).
+            alternative = "two-sided"
             p_value = np.nan
             n_targets = int(len(wide))
             mean_low = np.nan
             mean_high = np.nan
             delta = np.nan
+            min_n = int(getattr(self.config, "min_targets_for_wilcoxon", 10))
+            evaluable = bool(n_targets >= min_n)
 
             if n_targets > 0:
                 low = pd.to_numeric(wide["low"], errors="coerce")
@@ -2027,11 +2157,12 @@ class TargetRegulationBoxplotPipeline:
                 mean_high = float(high.mean())
                 delta = float(mean_high - mean_low)
 
-                if n_targets >= 3 and not np.allclose((high - low).fillna(0).to_numpy(), 0):
+                if evaluable and not np.allclose((high - low).fillna(0).to_numpy(), 0):
                     try:
-                        p_value = float(wilcoxon(high, low, alternative=alternative).pvalue)
+                        p_value = float(wilcoxon(high, low, alternative="two-sided").pvalue)
                     except ValueError:
                         p_value = np.nan
+                        evaluable = False
 
             rows.append(
                 {
@@ -2042,18 +2173,174 @@ class TargetRegulationBoxplotPipeline:
                     "site_label": site_label,
                     "tf_name": tf_name,
                     "n_paired_target_genes": n_targets,
+                    "evaluable": evaluable,
+                    "evaluability_status": "evaluable" if evaluable else "not_evaluable",
                     "mean_low_phospho_expression": mean_low,
                     "mean_high_phospho_expression": mean_high,
                     "delta_high_minus_low": delta,
                     "expected_direction": self._expected_high_low_text(direction_short, target_regulation),
-                    "alternative": alternative,
+                    "alternative": alternative if evaluable else "not_evaluable",
                     "wilcoxon_p_expected": p_value,
-                    "significance": self._p_to_stars(p_value),
+                    "significance": (
+                        self._p_to_stars(p_value) if evaluable else "not_evaluable"
+                    ),
                 }
             )
 
         return pd.DataFrame(rows)
 
+    def _compare_phospho_group_pair_by_site(
+        self,
+        df_plot: pd.DataFrame,
+        group_a: str,
+        group_b: str,
+        comparison_name: str,
+        alternative: Optional[str] = None,
+    ) -> pd.DataFrame:
+        """Paired Wilcoxon across target genes for two phospho_group labels (b vs a)."""
+        rows: List[Dict[str, object]] = []
+        group_cols = ["cancer_type", "direction_short", "target_regulation", "site", "site_label", "tf_name"]
+        for keys, sub in df_plot.groupby(group_cols):
+            cancer_type, direction_short, target_regulation, site, site_label, tf_name = keys
+            present = set(sub["phospho_group"].astype(str))
+            if group_a not in present or group_b not in present:
+                continue
+            wide = (
+                sub.pivot_table(
+                    index="target_gene_id",
+                    columns="phospho_group",
+                    values="group_mean_expression",
+                    aggfunc="mean",
+                )
+                .dropna(subset=[group_a, group_b], how="any")
+            )
+            alt = alternative or self._expected_high_low_alternative(direction_short, target_regulation)
+            # For High/Detected vs Undetected keep same Import×activate expectation (greater)
+            p_value = np.nan
+            n_targets = int(len(wide))
+            mean_a = np.nan
+            mean_b = np.nan
+            delta = np.nan
+            if n_targets > 0:
+                a = pd.to_numeric(wide[group_a], errors="coerce")
+                b = pd.to_numeric(wide[group_b], errors="coerce")
+                mean_a = float(a.mean())
+                mean_b = float(b.mean())
+                delta = float(mean_b - mean_a)
+                if n_targets >= 3 and not np.allclose((b - a).fillna(0).to_numpy(), 0):
+                    try:
+                        p_value = float(wilcoxon(b, a, alternative=alt).pvalue)
+                    except ValueError:
+                        p_value = np.nan
+            rows.append(
+                {
+                    "comparison": comparison_name,
+                    "group_a": group_a,
+                    "group_b": group_b,
+                    "cancer_type": cancer_type,
+                    "direction_short": direction_short,
+                    "target_regulation": target_regulation,
+                    "site": site,
+                    "site_label": site_label,
+                    "tf_name": tf_name,
+                    "n_paired_target_genes": n_targets,
+                    "mean_group_a_expression": mean_a,
+                    "mean_group_b_expression": mean_b,
+                    "delta_b_minus_a": delta,
+                    "alternative": alt,
+                    "wilcoxon_p_expected": p_value,
+                    "significance": self._p_to_stars(p_value),
+                }
+            )
+        return pd.DataFrame(rows)
+
+    def export_three_level_supplement_comparisons(
+        self, df_points: pd.DataFrame, output_dir: Path
+    ) -> pd.DataFrame:
+        """Primary Detected High vs Low + optional High/Detected vs Undetected."""
+        if df_points.empty or self.config.phospho_split_mode != "detected_median":
+            return pd.DataFrame()
+        out_dir = Path(output_dir) / "high_low_phospho_boxplots"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        primary = self._compare_high_low_by_site(df_points).assign(
+            comparison="detected_high_vs_detected_low",
+            group_a="low",
+            group_b="high",
+        )
+        primary = primary.rename(
+            columns={
+                "mean_low_phospho_expression": "mean_group_a_expression",
+                "mean_high_phospho_expression": "mean_group_b_expression",
+                "delta_high_minus_low": "delta_b_minus_a",
+            }
+        )
+        frames: List[pd.DataFrame] = [primary]
+
+        if "undetected" in set(df_points["phospho_group"].astype(str)):
+            frames.append(
+                self._compare_phospho_group_pair_by_site(
+                    df_points, "undetected", "high", "detected_high_vs_undetected"
+                )
+            )
+            det = df_points[df_points["phospho_group"].isin(["low", "high"])].copy()
+            und = df_points[df_points["phospho_group"].eq("undetected")].copy()
+            rows_det: List[Dict[str, object]] = []
+            key_cols = [
+                "cancer_type",
+                "direction_short",
+                "target_regulation",
+                "site",
+                "site_label",
+                "tf_name",
+                "target_gene_id",
+            ]
+            for keys, g in det.groupby(key_cols):
+                vals = pd.to_numeric(g["group_mean_expression"], errors="coerce")
+                w = pd.to_numeric(g["n_samples_for_group_expression"], errors="coerce").fillna(1.0)
+                mask = vals.notna()
+                if not mask.any():
+                    continue
+                rows_det.append(
+                    {
+                        "cancer_type": keys[0],
+                        "direction_short": keys[1],
+                        "target_regulation": keys[2],
+                        "site": keys[3],
+                        "site_label": keys[4],
+                        "tf_name": keys[5],
+                        "target_gene_id": keys[6],
+                        "phospho_group": "detected",
+                        "group_mean_expression": float(
+                            np.average(vals[mask], weights=w[mask])
+                        ),
+                        "n_samples_for_group_expression": int(w.sum()),
+                    }
+                )
+            if rows_det and not und.empty:
+                und_pts = und[
+                    key_cols
+                    + ["phospho_group", "group_mean_expression", "n_samples_for_group_expression"]
+                ].copy()
+                combo = pd.concat([pd.DataFrame(rows_det), und_pts], ignore_index=True)
+                frames.append(
+                    self._compare_phospho_group_pair_by_site(
+                        combo, "undetected", "detected", "detected_vs_undetected"
+                    )
+                )
+
+        frames = [f for f in frames if f is not None and not f.empty]
+        if not frames:
+            return pd.DataFrame()
+        out = pd.concat(frames, ignore_index=True, sort=False)
+        out = self._add_p_value_correction(
+            out,
+            group_cols=["cancer_type", "direction_short", "target_regulation", "comparison"],
+            p_col="wilcoxon_p_expected",
+            q_col="wilcoxon_q_bh",
+        )
+        out.to_csv(out_dir / "three_level_phospho_comparisons_by_site.csv", index=False)
+        return out
 
     def plot_cancer_direction_boxplot(
         self,
@@ -2081,8 +2368,8 @@ class TargetRegulationBoxplotPipeline:
             "activate": "Activate targets",
         }
         group_color_map = {
-            "low": "#8FAFBC",
-            "high": "#E3A07A",
+            "low": "#0072B2",
+            "high": "#C93C37",
         }
         group_label_map = {
             "low": "Low phospho",
@@ -2456,8 +2743,8 @@ class TargetRegulationBoxplotPipeline:
             "activate": "Activate targets",
         }
         group_color_map = {
-            "low": "#95B0B5",
-            "high": "#E7A983",
+            "low": "#0072B2",
+            "high": "#C93C37",
         }
         group_label_map = {
             "low": "Low phospho",
@@ -2638,8 +2925,8 @@ class TargetRegulationBoxplotPipeline:
         high_values = plot_df["high_value"].to_numpy()
         n_pairs = len(plot_df)
 
-        color_low = "#95B0B5"
-        color_high = "#E7A983"
+        color_low = "#0072B2"
+        color_high = "#C93C37"
         edge_color = "#333333"
         line_color = "#B7B7B7"
 
@@ -2850,9 +3137,8 @@ class TargetRegulationBoxplotPipeline:
                 plot_dir,
             )
 
-        self.plot_activate_merged_across_cancers(df_pairs, df_stats, plot_dir)
-
-
+        self.plot_regulation_merged_across_cancers(df_pairs, df_stats, plot_dir, target_regulation="activate")
+        self.plot_regulation_merged_across_cancers(df_pairs, df_stats, plot_dir, target_regulation="repress")
 
     def plot_activate_merged_across_cancers(
         self,
@@ -2860,31 +3146,44 @@ class TargetRegulationBoxplotPipeline:
         df_stats: pd.DataFrame,
         output_dir: Path,
     ) -> None:
+        """Backward-compatible wrapper: activate-only merged across-cancer panel."""
+        self.plot_regulation_merged_across_cancers(
+            df_pairs, df_stats, output_dir, target_regulation="activate"
+        )
+
+    def plot_regulation_merged_across_cancers(
+        self,
+        df_pairs: pd.DataFrame,
+        df_stats: pd.DataFrame,
+        output_dir: Path,
+        target_regulation: str = "activate",
+    ) -> None:
         output_dir.mkdir(parents=True, exist_ok=True)
         if df_pairs.empty:
             return
 
-        df_activate_all = df_pairs[df_pairs["target_regulation"].astype(str).eq("activate")].copy()
-        if df_activate_all.empty:
-            print("No activate merged pairs were available for across-cancer plotting.")
+        target_regulation = str(target_regulation)
+        df_reg_all = df_pairs[df_pairs["target_regulation"].astype(str).eq(target_regulation)].copy()
+        if df_reg_all.empty:
+            print(f"No {target_regulation} merged pairs were available for across-cancer plotting.")
             return
 
         group_color_map = {
-            "low": "#95B0B5",
-            "high": "#E7A983",
+            "low": "#0072B2",
+            "high": "#C93C37",
         }
         group_label_map = {
             "low": "Low phospho",
             "high": "High phospho",
         }
 
-        available_directions = set(df_activate_all["direction_short"].dropna().astype(str))
+        available_directions = set(df_reg_all["direction_short"].dropna().astype(str))
         configured_directions = [self._direction_short(d) for d in self.config.directions]
         direction_order = [d for d in configured_directions if d in available_directions]
         direction_order.extend(sorted(available_directions - set(direction_order)))
 
         for direction_short in direction_order:
-            df_sub = df_activate_all[df_activate_all["direction_short"].astype(str).eq(str(direction_short))].copy()
+            df_sub = df_reg_all[df_reg_all["direction_short"].astype(str).eq(str(direction_short))].copy()
             if df_sub.empty:
                 continue
 
@@ -2892,7 +3191,7 @@ class TargetRegulationBoxplotPipeline:
             stat_sub_direction = (
                 df_stats[
                     df_stats["direction_short"].astype(str).eq(str(direction_short))
-                    & df_stats["target_regulation"].astype(str).eq("activate")
+                    & df_stats["target_regulation"].astype(str).eq(target_regulation)
                 ].copy()
                 if not df_stats.empty
                 else pd.DataFrame()
@@ -2954,7 +3253,7 @@ class TargetRegulationBoxplotPipeline:
                     {
                         "cancer_type": str(cancer_type),
                         "direction_short": str(direction_short),
-                        "target_regulation": "activate",
+                        "target_regulation": target_regulation,
                         "n_paired_points": n_points,
                         "n_unique_target_genes": int(csub.loc[valid, "target_gene_id"].nunique()) if "target_gene_id" in csub.columns else n_points,
                         "n_unique_sites": int(csub.loc[valid, "site"].nunique()) if "site" in csub.columns else np.nan,
@@ -2966,12 +3265,12 @@ class TargetRegulationBoxplotPipeline:
                 current_x += 1.0
 
             if len(data_lists) == 0:
-                print(f"No {direction_short} activate cancer group passed the minimum box point cutoff.")
+                print(f"No {direction_short} {target_regulation} cancer group passed the minimum box point cutoff.")
                 continue
 
             direction_file_prefix = str(direction_short).lower()
             pd.DataFrame(summary_rows).to_csv(
-                output_dir / f"{direction_file_prefix}_activate_merged_across_cancers_plot_summary.csv",
+                output_dir / f"{direction_file_prefix}_{target_regulation}_merged_across_cancers_plot_summary.csv",
                 index=False,
             )
 
@@ -3013,7 +3312,7 @@ class TargetRegulationBoxplotPipeline:
             stat_sub = (
                 df_stats[
                     df_stats["direction_short"].astype(str).eq(str(direction_short))
-                    & df_stats["target_regulation"].astype(str).eq("activate")
+                    & df_stats["target_regulation"].astype(str).eq(target_regulation)
                 ].copy()
                 if not df_stats.empty
                 else pd.DataFrame()
@@ -3048,7 +3347,7 @@ class TargetRegulationBoxplotPipeline:
             )
             plt.tight_layout(rect=[0, 0, 0.88, 1])
 
-            prefix = f"{direction_short}_activate_merged_all_cancers_high_low_phospho_target_expression_boxplot"
+            prefix = f"{direction_short}_{target_regulation}_merged_all_cancers_high_low_phospho_target_expression_boxplot"
             prefix = self._sanitize_filename(prefix)
             for ext in ["png", "pdf", "svg"]:
                 _savefig_with_numeric_ticks(
@@ -3060,7 +3359,6 @@ class TargetRegulationBoxplotPipeline:
                 numeric_y=True,
             )
             plt.close(fig)
-
 
     @staticmethod
     def _expected_effect_sign(direction_short: str, target_regulation: str) -> int:
@@ -3652,8 +3950,8 @@ class TargetRegulationBoxplotPipeline:
             df_plot["site_label"] = df_plot["site"].astype(str)
 
         group_color_map = {
-            "low": "#8FAFBC",
-            "high": "#E3A07A",
+            "low": "#0072B2",
+            "high": "#C93C37",
         }
         group_label_map = {
             "low": "Low phospho",
@@ -3908,7 +4206,7 @@ class TargetRegulationBoxplotPipeline:
         if df.empty:
             return
 
-        group_color_map = {"low": "#95B0B5", "high": "#E7A983"}
+        group_color_map = {"low": "#0072B2", "high": "#C93C37"}
         group_label_map = {"low": "Low phospho", "high": "High phospho"}
 
         for direction_short, sub in df.groupby("direction_short", dropna=False):
@@ -4273,6 +4571,10 @@ class TargetRegulationBoxplotPipeline:
         stats.to_csv(plot_dir / "high_low_phospho_comparison_by_site_all.csv", index=False)
         stats_for_plot = self._prepare_stats_for_plotting(stats)
         stats_for_plot.to_csv(plot_dir / "high_low_phospho_comparison_by_site_plotted.csv", index=False)
+
+        if self.config.phospho_split_mode == "detected_median":
+            print("Exporting three-level phospho comparisons (High/Low + Undetected supplements)...")
+            self.export_three_level_supplement_comparisons(df_points, output_dir)
 
         if stats_for_plot.empty:
             print(f"No sites passed min_box_points={self.config.min_box_points}; no boxplots will be drawn.")
@@ -5463,7 +5765,7 @@ class TargetRegulationBoxplotPipeline:
         if df.empty:
             return
 
-        group_color_map = {"low": "#95B0B5", "high": "#E7A983"}
+        group_color_map = {"low": "#0072B2", "high": "#C93C37"}
         group_label_map = {"low": "Low phospho", "high": "High phospho"}
 
         df.to_csv(plot_dir / "FigureB_signed_tf_activity_score_points.csv", index=False)
@@ -6471,6 +6773,15 @@ def parse_args() -> argparse.Namespace:
         default=TempoConfig.use_bh_pvalue_correction,
         help="Apply Benjamini-Hochberg correction when annotating plots with significance stars.",
     )
+    parser.add_argument(
+        "--test-alternative",
+        choices=["directional", "two-sided"],
+        default=TempoConfig.test_alternative,
+        help=(
+            "Wilcoxon alternative for High vs Low target expression: "
+            "directional (one-sided by transport hypothesis) or two-sided."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -6518,6 +6829,7 @@ def _build_config_from_args(args: argparse.Namespace, split_mode: str, output_di
         purity_column=args.purity_column,
         min_samples_for_adjustment=args.min_samples_for_adjustment,
         use_bh_pvalue_correction=args.use_bh_pvalue_correction,
+        test_alternative=args.test_alternative,
     )
 
 

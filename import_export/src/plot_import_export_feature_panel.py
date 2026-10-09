@@ -47,9 +47,21 @@ mpl.rcParams["pdf.fonttype"] = 42
 mpl.rcParams["ps.fonttype"] = 42
 mpl.rcParams["svg.fonttype"] = "none"
 
-PREDICTED_IMPORT_CSV = DATA_PRECOMPUTED / "1_transport_classifier_results" / "joint_score" / "predicted_import_stable_gt0p6_vote4.csv"
+PREDICTED_IMPORT_CSV = (
+    PROJECT_ROOT
+    / "results"
+    / "1_transport_classifier_results"
+    / "joint_score_v11_147pos_d3_platt"
+    / "predicted_import_stable_gt0p6_vote4.csv"
+)
 
-PREDICTED_EXPORT_CSV = DATA_PRECOMPUTED / "1_transport_classifier_results" / "joint_score" / "predicted_export_stable_gt0p6_vote4.csv"
+PREDICTED_EXPORT_CSV = (
+    PROJECT_ROOT
+    / "results"
+    / "1_transport_classifier_results"
+    / "joint_score_v11_147pos_d3_platt"
+    / "predicted_export_stable_gt0p6_vote4.csv"
+)
 
 POSITIVE_CSV = PROJECT_ROOT / "data" / "dataset_phos_site" / "TF_positive_phos_site_0608.csv"
 
@@ -69,7 +81,12 @@ FEATURE_TABLE_FILES = {
     "sequence": "sequence_features_all_sty.csv",
 }
 
-OUTPUT_ROOT = PROJECT_ROOT / "results" / "4_1_feature_boxplot_stacked_barplot"
+OUTPUT_ROOT = (
+    PROJECT_ROOT
+    / "results"
+    / "4_1_feature_boxplot_stacked_barplot"
+    / "importexport_selected_panel_v11_147pos_d3"
+)
 
 INDEX_COL = "INDEX"
 PROTEIN_COL = "ACC_ID"
@@ -1123,7 +1140,12 @@ def draw_single_stackedbar_positive_only(ax, feature_name: str, data_dict: dict)
     ax.text(1.50, -0.18, "New", ha="center", va="center", fontsize=10.5, transform=ax.transData)
 
 
-OUTPUT_ROOT = PROJECT_ROOT / "results" / "4_1_feature_boxplot_stacked_barplot" / "importexport_selected_panel_no_negative"
+OUTPUT_ROOT = (
+    PROJECT_ROOT
+    / "results"
+    / "4_1_feature_boxplot_stacked_barplot"
+    / "importexport_selected_panel_v11_147pos_d3_platt"
+)
 
 # Exclude shared negative; significance only Known Import vs Known Export.
 POSITIVE_ONLY_PANEL = True
@@ -1132,17 +1154,18 @@ POSITIVE_ONLY_PANEL = True
 MAIN_PANEL_FEATURES: List[str] = [
     "MOTIF_1433_Nearest_Distance",
     "FUNC_Kinase_PWM_MSS_CAMK_Max",
-    "MOTIF_Domain_DBD_Within50AA_Flag",
+    "MOTIF_IDR_Within50AA_Flag",
 ]
 
 # Supplementary figure: 2 x 2 layout.
+# Row1: two AA composition boxes; Row2: NLS distance box + 1433 Inside flag.
 SUPP_PANEL_ROW1: List[str] = [
-    "SEQ_Sequence_Window_AAFrac_Lys",
-    "SEQ_Sequence_Window_AAFrac_Ile",
+    "SEQ_Sequence_Window_AAFrac_Arg",
+    "SEQ_Sequence_Window_AAFrac_Gln",
 ]
 SUPP_PANEL_ROW2: List[str] = [
-    "SEQ_Sequence_Window_AAFrac_Gln",
-    "MOTIF_Domain_Linker_HasSegment_Flag",
+    "MOTIF_NLS_Nearest_Distance",
+    "MOTIF_1433_Inside_Flag",
 ]
 SUPP_PANEL_FEATURES: List[str] = SUPP_PANEL_ROW1 + SUPP_PANEL_ROW2
 

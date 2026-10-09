@@ -10,13 +10,13 @@ This monorepo contains **three analysis modules**:
 |------------|------|
 | [`functional/`](functional/) | Localization-Regulatory Classifier |
 | [`import_export/`](import_export/) | Localization Direction Classifier |
-| [`cptac_analysis/`](cptac_analysis/) | CPTAC validation of predicted nuclear accumulation-associated phosphosites |
+| [`cptac_analysis/`](cptac_analysis/) | CPTAC **phospho-hotspot** target-regulation validation (four-arm, two-sided) |
 
 Typical workflow:
 
 1. Use the Localization-Regulatory Classifier to score whether a TF phosphosite is likely to regulate nuclear transport.
 2. Use the Localization Direction Classifier on transport-positive candidate sites to classify nuclear accumulation versus cytoplasmic redistribution.
-3. Use CPTAC validation to evaluate predicted nuclear accumulation-associated sites against tumor multi-omics target-gene regulation.
+3. Use CPTAC phospho-hotspot validation (Import/Export × activate/repress, two-sided) against tumor multi-omics target-gene regulation.
 
 ## Documentation guide
 
@@ -27,7 +27,7 @@ Start here for installation, prediction examples, and the repository map. For ta
 | Data bundle contents, expected paths, and upload notes | [`DATA.md`](DATA.md) |
 | Functional classifier prediction or training | [`functional/README.md`](functional/README.md) |
 | Import/export direction prediction, joint score, or training | [`import_export/README.md`](import_export/README.md) |
-| CPTAC target-regulation validation | [`cptac_analysis/README.md`](cptac_analysis/README.md) |
+| CPTAC phospho-hotspot / Figure 5 validation | [`cptac_analysis/README.md`](cptac_analysis/README.md) |
 | Exact finalized run settings and hyperparameters | [`docs/TRAINING_RUNS.md`](docs/TRAINING_RUNS.md) |
 | Figure, supplementary figure, and prediction script mapping | [`docs/FIGURES_AND_PREDICTION.md`](docs/FIGURES_AND_PREDICTION.md) |
 
@@ -112,9 +112,11 @@ python scripts/run_import_export_experiment.py \
   --output_tag esm_window_only_supcon_ce_import_pos
 ```
 
-### Run CPTAC validation
+### Run CPTAC phospho-hotspot validation
 
-See **[cptac_analysis/README.md](cptac_analysis/README.md)** for data setup (`cptac_analysis/data/source/`), `pyensembl`, and analysis commands.
+Manuscript Stage 3 is **hotspot-level** (Mixed / Predicted-candidate catalog; pure nuclear / pure cytoplasmic gates; `mean_z` activity). Figure 5 uses a **four-arm, two-sided** scan (Import/Export × activate/repress).
+
+See **[cptac_analysis/README.md](cptac_analysis/README.md)** for data setup (`cptac_analysis/data/source/`), `pyensembl`, catalog rules, and commands. Panel-to-script map: [`docs/FIGURES_AND_PREDICTION.md`](docs/FIGURES_AND_PREDICTION.md). Supplemental Tables S3–S4: [`supplement/`](supplement/).
 
 ## Data availability
 
@@ -124,7 +126,7 @@ Large feature files, model artifacts, CPTAC source files, and intermediate data 
 - [`import_export/data/README.md`](import_export/data/README.md)
 - [`cptac_analysis/data/README.md`](cptac_analysis/data/README.md)
 
-Full inventory and upload notes: **[DATA.md](DATA.md)**.
+Full inventory and upload notes: **[DATA.md](DATA.md)**. Manuscript supplemental association tables are under [`supplement/`](supplement/).
 The root-level [`PhosLoc-Transport_DATA_README.txt`](PhosLoc-Transport_DATA_README.txt)
 is a companion note for the external Zenodo data bundle; [`DATA.md`](DATA.md)
 remains the canonical in-repository data inventory.
@@ -164,10 +166,12 @@ phosloc-transport/
 |   |-- configs/
 |   |-- src/
 |   `-- results/
-`-- cptac_analysis/
-    |-- data/                    # CPTAC / ChIP / regulon inputs
-    |-- scripts/
-    `-- results/                 # integrated pipeline + boxplot outputs
+|-- cptac_analysis/
+|   |-- data/                    # CPTAC / ChIP / regulon inputs
+|   |-- scripts/                 # CLI wrappers
+|   |-- src/                     # implementations
+|   `-- results/                 # hotspot CPTAC + figure outputs (local)
+`-- supplement/                  # Supplemental Tables S3–S4 (small Excel)
 ```
 
 The documented commands use `scripts/` paths as stable command-line entry points.
@@ -183,7 +187,7 @@ The finalized training runs are recorded below.
 |----------|--------------|
 | Localization-Regulatory Classifier | `run_20260610_204935_ESM Window+Site+PDB` |
 | Localization Direction Classifier | `run_20260612_125646_esm_window_only_supcon_ce_import_pos` |
-| CPTAC validation | `results/import_target_regulation/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
+| CPTAC hotspot (Fig. 5 four-arm, two-sided) | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` (see [cptac_analysis/README.md](cptac_analysis/README.md)) |
 
 Run metadata snapshots for Stages 1-2 are stored under each subproject's `configs/runs/` directory.
 
@@ -207,7 +211,7 @@ for the recommended reading path.
 - Use `--device cpu` on machines without a CUDA-capable GPU.
 - Check that `ACC_ID` values match the FASTA, ESM embedding filenames, and AlphaFold/PDB files.
 - For Localization-Regulatory Classifier prediction, use `--skip_pdb_position_filter` only when you intentionally want to bypass the PDB-position availability check.
-- For CPTAC validation, install `pyensembl` and prepare the Ensembl release cache before running the integrated CPTAC pipeline.
+- For CPTAC hotspot validation, install `pyensembl` and prepare the Ensembl release cache before running the hotspot CPTAC pipeline.
 - Paths in config files are relative to each subproject root unless stated otherwise.
 
 ## Citation

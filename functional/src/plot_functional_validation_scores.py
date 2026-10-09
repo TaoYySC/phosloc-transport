@@ -18,17 +18,35 @@ import matplotlib.pyplot as plt
 from scipy.stats import fisher_exact, hypergeom, gaussian_kde, wilcoxon
 
 
-pred_path = DATA_PRECOMPUTED / "2_1_functional_classifier_results" / "predictions" / "esm_window_site_pdb_5_folds_ensemble_predictions.csv"
+# Defaults: v11 147-pos ensemble predictions + cluster sheets from
+# TF_localization_final_four_sheets.xlsx (Cluster Nuclear / Cluster Cyto).
+pred_path = (
+    PROJECT_ROOT
+    / "results"
+    / "2_1_functional_classifier_results"
+    / "predictions"
+    / "v11_147pos_5_folds_ensemble_predictions.csv"
+)
 pos_path = PROJECT_ROOT / "data" / "dataset_phos_site" / "TF_positive_phos_site_0608.csv"
-cluster_path = PROJECT_ROOT / "data" / "dataset_phos_site" / "co_working_multi_site_with_PMID.csv"
+cluster_path = (
+    PROJECT_ROOT
+    / "data"
+    / "dataset_phos_site"
+    / "co_working_multi_site_from_cluster_sheets.csv"
+)
 
-out_dir = PROJECT_ROOT / "results" / "2_1_functional_classifier_results" / "single_model_rank_eval_5_folds_ensemble"
+out_dir = (
+    PROJECT_ROOT
+    / "results"
+    / "2_1_functional_classifier_results"
+    / "single_model_rank_eval_v11_147pos_cluster_sheets"
+)
 out_dir.mkdir(parents=True, exist_ok=True)
 
 score_col = "mean_prob"
 ks = [1, 3, 5, 10]
 top_percentiles = [0.01, 0.05, 0.10, 0.20]
-n_permutations = 10000
+n_permutations = 1000
 random_seed = 43
 exclude_known_positive_from_cluster = True
 cluster_gap_for_auto_id = 30

@@ -1,19 +1,19 @@
 # Figures, supplementary figures, and prediction scripts
 
-This document maps manuscript panels to scripts in the monorepo. Script names reflect **function**; panel labels are in each script's header comment. Some long-running scripts are thin CLI wrappers whose implementations live under the corresponding subproject's `src/` directory; run commands still use the `scripts/` paths listed below.
+This document maps manuscript panels to scripts in the monorepo. Script names reflect **function**; panel labels are in each script's header comment.
 
 All paths are relative to each subproject root (`functional/` or `import_export/`).
 
 ## Setup
 
 1. Install dependencies from the repo root: `pip install -r requirements.txt`
-2. Optional for Stage 3: uncomment `pyensembl` in `requirements.txt`, then rerun `pip install -r requirements.txt`
+2. Optional: uncomment and install `pyensembl` in [`requirements.txt`](../requirements.txt) (required for Stage 3)
 3. Provide data under `functional/data/`, `import_export/data/`, and `cptac_analysis/data/source/` — see **[DATA.md](../DATA.md)**.
 
 Plot scripts read bundled inputs from `data/precomputed/` and `data/features/`.  
 Inference uses `data/model_artifacts/`. New figures are written to `results/`.
 
-## Localization-Regulatory Classifier (`functional/scripts/`)
+## Functional transport classifier (`functional/scripts/`)
 
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
@@ -34,13 +34,13 @@ python scripts/plot_model_ablation_comparison.py
 python scripts/predict_functional_transport.py --device cpu
 ```
 
-## Localization Direction Classifier (`import_export/scripts/`)
+## Import/export direction classifier (`import_export/scripts/`)
 
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
 | Figure 3b | `plot_import_export_model_performance.py` | `data/precomputed/.../metrics_all_runs.csv` | `results/1_transport_classifier_results/model_performance/` |
 | Figure 3c | `calculate_joint_direction_score.py` | `functional/data/precomputed/...`, IE per-fold predictions in `data/precomputed/` | `results/1_transport_classifier_results/joint_score/` |
-| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + Localization-Regulatory Classifier ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/esm_window_only_supcon_ce_import_pos_score_distribution_platt/` |
+| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + functional ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/esm_window_only_supcon_ce_import_pos_score_distribution_platt/` |
 | Figure 3d; Supp. Fig. 4d | `plot_import_export_feature_panel.py` | `data/precomputed/.../joint_score/`, `../functional/data/features/` | `results/4_1_feature_boxplot_stacked_barplot/importexport_selected_panel_no_negative/` |
 | **Prediction** | `predict_import_export_direction.py` | `data/model_artifacts/.../fold_artifacts/`, Platt calibrator | `results/1_transport_classifier_results/esm_window_only_import_pos_predictions/` |
 | **Training** | `run_import_export_experiment.py` | Experiment YAML, cluster CSV, embeddings | `results/run_*/Import_vs_Export/` |
@@ -50,26 +50,42 @@ Example:
 ```bash
 cd import_export
 python scripts/plot_import_export_model_performance.py
-python scripts/calculate_joint_direction_score.py --functional_score_threshold 0.6 --min_vote 4
+python scripts/calculate_joint_direction_score.py
 python scripts/predict_import_export_direction.py --device cpu
 ```
 
-## CPTAC target-regulation analysis (`cptac_analysis/scripts/`)
+## CPTAC phospho-hotspot analysis (`cptac_analysis/scripts/`)
 
 All paths are relative to `cptac_analysis/`. Requires `pyensembl` and a populated `data/source/` directory (see [cptac_analysis/data/README.md](../cptac_analysis/data/README.md)).
 
+**Manuscript primary analysis is hotspot-level.** Figure 4 covers spatial / direction
+definition (4A–C) and CPTAC association panels; Figure 5 is the four-arm two-sided
+concordance heatmap. Supp. Fig. 2e enrichment stars use **unadjusted permutation P**
+(`* P < 0.05`); BH q values are listed in Table S3.
+
 | Panel / output | Script | Main inputs | Output directory |
 |----------------|--------|-------------|------------------|
-| Integrated analysis | `run_import_target_regulation_analysis.py` | `data/source/`, stable import predictions, known positives | `results/import_target_regulation/` |
-| Per-site across cancers | `plot_phosphosite_across_cancers.py` | `results/import_target_regulation/high_low_phospho_boxplots/*.csv` | `results/phosphosite_across_cancers_boxplots/` |
-| Combined significant sites | `plot_significant_sites_combined.py` | same boxplot tables | `results/import_target_regulation/high_low_phospho_boxplots/all_significant_sites_combined/` |
+| Hotspot catalog (Mixed/Predicted) | `build_hotspots_mixed_pred_filter.py` | FuncTransport+Direction summary (v11) | `results/.../hotspots_mixed_pred_filter/` |
+| Pure nuclear/cyto gates | `reannotate_hotspot_pure_direction.py` | mixed_pred_filter catalog | `.../hotspots_mixed_pred_filter_pure_direction/` |
+| CPTAC hotspot scan | `run_hotspot_target_regulation_analysis.py` | pure-direction catalog, `data/source/` | per-arm trees under `results/hotspot_*` |
+| Figure **4b–4f** | `plot_hotspot_figure4.py` | hotspot CPTAC results | `results/hotspot_mixed_pred_filter_pure_mean_z_median_20260914/figure4/` |
+| Figure **4A–C** / S5 | `run_figure4_spatial_direction_panels.py` | summary + mixed_pred_filter catalog | `results/figure4_spatial_direction_panels_v11_147pos_d3_platt/` |
+| Figure **5** four-arm heatmap | `plot_two_sided_four_arm_significance_heatmap.py` | two-sided four-arm results | `results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/combined_four_arm_heatmap/` |
+| Table **S4** associations | `analyze_two_sided_concordance.py` | concordance flags CSV | `../supplement/Supplemental_Table_4.xlsx` |
+| Table **S3** co-regulatory enrichment | `../functional/scripts/plot_functional_validation_scores.py` | reported co-regulatory (cluster-sheet) sites | `../supplement/Supplemental_Table_3.xlsx` |
+| Hotspot Cox / KM | `run_hotspot_survival_cox.py` | BH-significant cancer×hotspot pairs | `results/survival_analysis/hotspot_cox_*` |
+| Legacy unit-site scan | `run_import_target_regulation_analysis.py` | predicted import sites | `results/import_target_regulation/` |
 
-Example:
+Example (catalog + Figure 5):
 
 ```bash
 cd cptac_analysis
 
-python scripts/run_import_target_regulation_analysis.py
-python scripts/plot_phosphosite_across_cancers.py --site-labels STAT3_Y705 STAT3_S701
-python scripts/plot_significant_sites_combined.py
+python scripts/build_hotspots_mixed_pred_filter.py
+python scripts/reannotate_hotspot_pure_direction.py
+python scripts/analyze_two_sided_concordance.py
+python scripts/plot_two_sided_four_arm_significance_heatmap.py
+python scripts/run_figure4_spatial_direction_panels.py
 ```
+
+See [cptac_analysis/README.md](../cptac_analysis/README.md) for catalog rules, Figure 5b counts, and legacy unit-site commands.

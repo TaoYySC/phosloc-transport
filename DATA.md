@@ -96,10 +96,16 @@ CPTAC validation also reads stable nuclear accumulation predictions and known po
 
 | Path | Produced by |
 |------|-------------|
-| `functional/results/` | Training, plotting, `predict_functional_transport.py` |
+| `functional/results/` | Training, plotting, `predict_functional_transport.py`, `plot_functional_validation_scores.py` |
 | `import_export/results/` | Training, plotting, `calculate_joint_direction_score.py`, `predict_import_export_direction.py` |
-| `cptac_analysis/results/import_target_regulation/` | `run_import_target_regulation_analysis.py` |
-| `cptac_analysis/results/phosphosite_across_cancers_boxplots/` | `plot_phosphosite_across_cancers.py` |
+| `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` | Figure 5 four-arm two-sided hotspot CPTAC (primary) |
+| `cptac_analysis/results/hotspot_mixed_pred_filter_pure_mean_z_median_20260914/` | Earlier Import-focused hotspot CPTAC / Fig. 4b–4f |
+| `cptac_analysis/results/import_target_regulation/` | Legacy unit-site `run_import_target_regulation_analysis.py` |
+| `cptac_analysis/results/phosphosite_across_cancers_boxplots/` | Legacy `plot_phosphosite_across_cancers.py` |
+| `supplement/` | Small Supplemental Tables S3–S4 (tracked in Git; not Zenodo) |
+
+Hotspot CPTAC result trees are large and remain **local / optional Zenodo add-ons**.
+The Zenodo DOI above currently ships `data/` inputs (features, artifacts, CPTAC `source/`), not full `results/`.
 
 After running `calculate_joint_direction_score.py`, copy refreshed joint-score CSVs into `import_export/data/precomputed/.../joint_score/` if you want feature-panel plots to use the latest scores without editing script paths.
 

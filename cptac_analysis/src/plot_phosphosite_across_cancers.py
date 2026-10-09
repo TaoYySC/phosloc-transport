@@ -52,6 +52,17 @@ PRESET_SITES: Dict[str, str] = {
   "E2F4_T224": "ENSG00000205250|T224",
   "NFATC2_S53": "ENSG00000101096|S53",
   "HSF1_S326": "ENSG00000185122|S326",
+  "FOXO1_S276": "ENSG00000150907|S276",
+  "AR_S96": "ENSG00000169083|S96",
+  "AR_S516": "ENSG00000169083|S516",
+  "ESRRA_S27": "ENSG00000173153|S27",
+  "STAT1_S708": "ENSG00000115415|S708",
+  "NFKB1_S337": "ENSG00000109320|S337",
+  "STAT1_T699-S708": "ENSG00000115415|HS_P42224_H1_T699_S708",
+  "CUX1_Y1209-S1218": "ENSG00000257923|HS_P39880_H1_Y1209_S1218",
+  "POU2F1_S441-S448": "ENSG00000143190|HS_P14859_H2_S441_S448",
+  "NFATC2_S53-S79": "ENSG00000101096|HS_Q13469_H1_S53_S79",
+  "AR_S647-T653": "ENSG00000169083|HS_P10275_H1_S647_T653",
 }
 DEFAULT_BATCH_SITE_LABELS = [
   "STAT3_Y705",
@@ -72,8 +83,8 @@ MERGED_BOX_STYLE = {
     "scatter_alpha": 0.4,
     "jitter_range": 0.06,
     "group_color_map": {
-        "low": "#95B0B5",
-        "high": "#E7A983",
+        "low": "#0072B2",
+        "high": "#C93C37",
     },
     "y_cap": 1.0,
     "star_y_frac": 0.90,
@@ -89,6 +100,91 @@ MERGED_BOX_STYLE = {
     "y_tick_labelsize": 14.5,
 }
 
+# Shared style for 2-cancer across-cancer hotspot panels (balanced boxes, square canvas).
+TWO_CANCER_ACROSS_STYLE: Dict[str, object] = {
+    "fig_width": 4.6,
+    "fig_height": 4.8,
+    "fig_width_min": 4.6,
+    "pair_offset": 0.17,
+    "box_width": 0.28,
+    "jitter_range": 0.05,
+    "x_pad_extra": 0.04,
+    "group_spacing": 0.78,
+    "x_label_rotation": 0,
+    "x_label_ha": "center",
+    "subplots_left": 0.16,
+    "subplots_bottom": 0.14,
+    "subplots_right": 0.98,
+}
+
+# Same box geometry as TWO_CANCER; canvas for three concordant BH-significant cancers.
+THREE_CANCER_ACROSS_STYLE: Dict[str, object] = {
+    "fig_width": 6.5,
+    "fig_height": 4.8,
+    "fig_width_min": 6.5,
+    "pair_offset": 0.17,
+    "box_width": 0.28,
+    "jitter_range": 0.05,
+    "x_pad_extra": 0.04,
+    "group_spacing": 0.78,
+    "x_label_rotation": 0,
+    "x_label_ha": "center",
+    "subplots_left": 0.12,
+    "subplots_bottom": 0.14,
+    "subplots_right": 0.98,
+}
+
+# Same box geometry as TWO_CANCER; wider canvas for six BH-significant cancers.
+SIX_CANCER_ACROSS_STYLE: Dict[str, object] = {
+    "fig_width": 12.2,
+    "fig_height": 4.8,
+    "fig_width_min": 12.2,
+    "pair_offset": 0.17,
+    "box_width": 0.28,
+    "jitter_range": 0.05,
+    "x_pad_extra": 0.04,
+    "group_spacing": 0.78,
+    "x_label_rotation": 0,
+    "x_label_ha": "center",
+    "subplots_left": 0.08,
+    "subplots_bottom": 0.14,
+    "subplots_right": 0.98,
+}
+
+# Same box geometry as TWO_CANCER; wider canvas for four BH-significant cancers.
+FOUR_CANCER_ACROSS_STYLE: Dict[str, object] = {
+    "fig_width": 8.4,
+    "fig_height": 4.8,
+    "fig_width_min": 8.4,
+    "pair_offset": 0.17,
+    "box_width": 0.28,
+    "jitter_range": 0.05,
+    "x_pad_extra": 0.04,
+    "group_spacing": 0.78,
+    "x_label_rotation": 0,
+    "x_label_ha": "center",
+    "subplots_left": 0.10,
+    "subplots_bottom": 0.14,
+    "subplots_right": 0.98,
+}
+
+# Same box geometry as TWO_CANCER, but canvas sized for a single cancer pair.
+ONE_CANCER_ACROSS_STYLE: Dict[str, object] = {
+    "fig_width": 2.9,
+    "fig_height": 4.8,
+    "fig_width_min": 2.9,
+    "pair_offset": 0.17,
+    "box_width": 0.28,
+    "jitter_range": 0.05,
+    "x_pad_extra": 0.04,
+    "group_spacing": 0.78,
+    "x_label_rotation": 0,
+    "x_label_ha": "center",
+    "subplots_left": 0.30,
+    "subplots_bottom": 0.14,
+    "subplots_right": 0.96,
+}
+
 # Per-site overrides; other sites keep MERGED_BOX_STYLE defaults.
 SITE_PLOT_OVERRIDES: Dict[str, Dict[str, object]] = {
     "HSF1_S326": {
@@ -97,6 +193,39 @@ SITE_PLOT_OVERRIDES: Dict[str, Dict[str, object]] = {
         "ylim_data_padding_frac": 0.08,
         "ylim_bottom_extra_frac": 0.05,
     },
+    "HSF1_S292-S326": {
+        "y_lim": (-0.5, 0.5),
+        "y_ticks": [-0.5, -0.25, 0.0, 0.25, 0.5],
+        "auto_ylim_from_data": False,
+        # Single-cancer panel: tall & narrow so boxes look fuller (not flattened by wide canvas)
+        "fig_width": 3.4,
+        "fig_height": 3.9,
+        "x_label_rotation": 0,
+        "x_label_ha": "center",
+        "subplots_bottom": 0.14,
+        "pair_offset": 0.18,
+        "box_width": 0.28,
+    },
+    # Example panels: BH-significant AND direction-concordant cancers only
+    "STAT1_T699-S708": {**TWO_CANCER_ACROSS_STYLE, "cancer_types": ["BRCA", "OV"]},
+    "CUX1_Y1209-S1218": {
+        **THREE_CANCER_ACROSS_STYLE,
+        "cancer_types": ["BRCA", "COAD", "GBM"],  # drop discordant UCEC
+    },
+    "POU2F1_S441-S448": {
+        **ONE_CANCER_ACROSS_STYLE,
+        "cancer_types": ["OV"],  # Export×repress: drop discordant LSCC/PDAC
+    },
+    "NFATC2_S53-S79": {
+        **SIX_CANCER_ACROSS_STYLE,
+        "cancer_types": ["BRCA", "GBM", "HNSCC", "LSCC", "OV", "UCEC"],
+    },
+    "AR_S647-T653": {
+        **ONE_CANCER_ACROSS_STYLE,
+        "cancer_types": ["CCRCC"],  # drop discordant GBM
+    },
+    "NFKB2_S727-T740": {**ONE_CANCER_ACROSS_STYLE, "cancer_types": ["LUAD"]},
+    "IRF9_S131-S139": {**ONE_CANCER_ACROSS_STYLE, "cancer_types": ["PDAC"]},
     "HIF1A_S643": {
         "cancer_types": ["HNSCC"],
         "pair_offset": 0.08,
@@ -421,6 +550,7 @@ def plot_site_across_cancers(
     ticklabels: List[str] = []
     stat_pos: Dict[str, float] = {}
     pair_offset = style["pair_offset"]
+    group_spacing = float(style.get("group_spacing", 1.0))
     current_x = 1.0
 
     for cancer_type in cancer_types:
@@ -452,7 +582,7 @@ def plot_site_across_cancers(
         x_centers.append(current_x)
         ticklabels.append(cancer_type)
         stat_pos[cancer_type] = current_x
-        current_x += 1.0
+        current_x += group_spacing
 
     if not cancer_groups:
         raise ValueError(f"No valid boxplot data for site={site} across cancers={cancer_types}")
@@ -461,6 +591,22 @@ def plot_site_across_cancers(
         df_plot.drop_duplicates(subset=["site", "ACC_ID", "RESIDUE", "POSITION"]),
         direction_short,
     )
+    # Hotspot panels: prefer hotspot_class for title color (known_containing → orange).
+    if "hotspot_class" in df_plot.columns:
+        hs_class = (
+            df_plot["hotspot_class"]
+            .dropna()
+            .astype(str)
+            .str.strip()
+            .replace("", pd.NA)
+            .dropna()
+        )
+        if not hs_class.empty:
+            cls = str(hs_class.iloc[0]).lower()
+            if cls in {"known_containing", "known_proximal"}:
+                site_status = "known_positive"
+            elif cls in {"known_independent"}:
+                site_status = "new_predicted"
     site_title_color = site_label_color_map.get(site_status, site_label_color_map["new_predicted"])
 
     if "fig_width" in style and "fig_height" in style:
@@ -539,7 +685,7 @@ def plot_site_across_cancers(
             )
 
     ax.set_title(
-        f"{site_label} | Import activate targets",
+        f"{site_label} | {direction_short} {target_regulation} targets",
         fontsize=13.0,
         color=site_title_color,
         fontweight="bold" if site_status == "known_positive" else "normal",
@@ -547,7 +693,11 @@ def plot_site_across_cancers(
     )
 
     plt.tight_layout()
-    fig.subplots_adjust(left=0.22, bottom=float(style.get("subplots_bottom", 0.22)))
+    fig.subplots_adjust(
+        left=float(style.get("subplots_left", 0.22)),
+        bottom=float(style.get("subplots_bottom", 0.22)),
+        right=float(style.get("subplots_right", 0.98)),
+    )
 
     ax.tick_params(
         axis="y",
@@ -640,7 +790,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    base_dir = _CPTAC_ROOT / "scripts"
+    base_dir = Path(__file__).resolve().parent
     points_path = Path(args.points_csv)
     if not points_path.is_absolute():
         points_path = base_dir / points_path

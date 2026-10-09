@@ -55,6 +55,42 @@ LEGEND_LABELS = {
     "new_predicted": "New predicted site",
 }
 
+# Hotspot-level label colors / legend (used when hotspot_class is present)
+HOTSPOT_STATUS_COLOR_MAP = {
+    "known_containing": "#C97B49",
+    "known_proximal": "#7A9E9F",
+    "known_independent": "#5E8FA1",
+}
+HOTSPOT_STATUS_LEGEND = {
+    "known_containing": "Known-containing hotspot",
+    "known_proximal": "Known-proximal hotspot",
+    "known_independent": "Known-independent hotspot",
+}
+
+
+def hotspot_class_to_status(hotspot_class: object) -> Optional[str]:
+    """Map hotspot_class to a plot status key; None if not a hotspot annotation."""
+    cls = str(hotspot_class).strip() if pd.notna(hotspot_class) else ""
+    if cls in HOTSPOT_STATUS_COLOR_MAP:
+        return cls
+    return None
+
+
+def _resolve_site_status(
+    site_sub: pd.DataFrame,
+    pipeline: TargetRegulationBoxplotPipeline,
+    direction_short: str = "Import",
+) -> str:
+    """Prefer hotspot_class when available; else fall back to unit-site known lookup."""
+    if "hotspot_class" in site_sub.columns and site_sub["hotspot_class"].notna().any():
+        status = hotspot_class_to_status(site_sub["hotspot_class"].dropna().iloc[0])
+        if status is not None:
+            return status
+    return pipeline.site_label_status(
+        site_sub.drop_duplicates(subset=["site", "ACC_ID", "RESIDUE", "POSITION"]),
+        direction_short,
+    )
+
 
 def _draw_y_axis_tick_marks(
     ax,
@@ -174,9 +210,10 @@ def load_significant_entries(
     cancer_rank = {cancer: rank for rank, cancer in enumerate(cancer_counts.index.astype(str))}
     out["cancer_rank"] = out["cancer_type"].astype(str).map(cancer_rank).fillna(999).astype(int)
     out["cancer_n_sig"] = out["cancer_type"].astype(str).map(cancer_counts.astype(int)).fillna(0).astype(int)
+    # Left→right: higher significance first; ties by High−Low delta (desc), then q/p.
     out = out.sort_values(
-        ["cancer_rank", "significance_rank", "p_sort", "delta_high_minus_low", "site_label"],
-        ascending=[True, False, True, False, True],
+        ["significance_rank", "delta_high_minus_low", "p_sort", "site_label"],
+        ascending=[False, False, True, True],
     )
     return out
 
@@ -189,11 +226,9 @@ def _site_status_lookup(
     lookup: Dict[Tuple[str, str], str] = {}
     group_cols = ["cancer_type", "site"]
     for (cancer_type, site), site_sub in df_points.groupby(group_cols, dropna=False):
-        status = pipeline.site_label_status(
-            site_sub.drop_duplicates(subset=["site", "ACC_ID", "RESIDUE", "POSITION"]),
-            direction_short,
+        lookup[(str(cancer_type), str(site))] = _resolve_site_status(
+            site_sub, pipeline, direction_short
         )
-        lookup[(str(cancer_type), str(site))] = status
     return lookup
 
 
@@ -208,9 +243,20 @@ def export_combined_sites_tables(
 ) -> Dict[str, Path]:
     """Export Import activate-target site tables for cancers in the combined figure."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    cancer_types = sorted(sig_entries["cancer_type"].astype(str).unique().tolist())
+    # Full cancer list from stats (not only plotted cancers), so tables keep all tested sites.
+    cancer_types = sorted(
+        df_stats[
+            df_stats["direction_short"].astype(str).eq(direction_short)
+            & df_stats["target_regulation"].astype(str).eq(target_regulation)
+        ]["cancer_type"]
+        .astype(str)
+        .unique()
+        .tolist()
+    )
+    if not cancer_types and sig_entries is not None and not sig_entries.empty:
+        cancer_types = sorted(sig_entries["cancer_type"].astype(str).unique().tolist())
     if not cancer_types:
-        raise ValueError("No cancers found in significant entries.")
+        raise ValueError("No cancers found in stats/significant entries.")
 
     stat_sub = df_stats[
         df_stats["direction_short"].astype(str).eq(direction_short)
@@ -218,11 +264,17 @@ def export_combined_sites_tables(
         & df_stats["cancer_type"].astype(str).isin(cancer_types)
     ].copy()
     if stat_sub.empty:
-        raise ValueError("No Import activate site statistics found for selected cancers.")
+        raise ValueError(f"No {direction_short} activate site statistics found for selected cancers.")
 
     sig_col = pipeline._plot_significance_column(stat_sub)
     stat_sub["significance_bh"] = stat_sub[sig_col].fillna("ns").astype(str)
+    # True BH flag (all directions). Direction filter applies only to plotting, not to table BH labels.
     stat_sub["is_bh_significant"] = stat_sub["significance_bh"].ne("ns")
+    deltas = pd.to_numeric(stat_sub.get("delta_high_minus_low"), errors="coerce")
+    stat_sub["matches_hypothesis"] = [
+        pipeline._delta_matches_hypothesis(direction_short, target_regulation, d)
+        for d in deltas
+    ]
     stat_sub["significance_rank"] = stat_sub["significance_bh"].map(
         TargetRegulationBoxplotPipeline._significance_rank
     )
@@ -248,12 +300,14 @@ def export_combined_sites_tables(
         stat_sub["cancer_type"].astype(str).map(cancer_sig_counts).fillna(0).astype(int)
     )
 
-    plotted_keys = set(
-        zip(
-            sig_entries["cancer_type"].astype(str),
-            sig_entries["site"].astype(str),
+    plotted_keys = set()
+    if sig_entries is not None and not sig_entries.empty:
+        plotted_keys = set(
+            zip(
+                sig_entries["cancer_type"].astype(str),
+                sig_entries["site"].astype(str),
+            )
         )
-    )
     stat_sub["in_combined_figure"] = [
         (str(ct), str(site)) in plotted_keys
         for ct, site in zip(stat_sub["cancer_type"], stat_sub["site"])
@@ -280,12 +334,14 @@ def export_combined_sites_tables(
         {
             "known_positive": "Known positive site",
             "new_predicted": "New predicted site",
+            **HOTSPOT_STATUS_LEGEND,
         }
     )
 
+    # Match combined figure order: significance ↓, then High−Low delta ↓.
     stat_sub = stat_sub.sort_values(
-        ["cancer_rank", "significance_rank", "p_sort", "delta_high_minus_low", "site_label"],
-        ascending=[True, False, True, False, True],
+        ["significance_rank", "delta_high_minus_low", "p_sort", "site_label"],
+        ascending=[False, False, True, True],
     ).reset_index(drop=True)
     stat_sub["table_row_order"] = np.arange(1, len(stat_sub) + 1)
 
@@ -307,6 +363,7 @@ def export_combined_sites_tables(
         "mean_high_phospho_expression",
         "delta_high_minus_low",
         "expected_direction",
+        "matches_hypothesis",
         "wilcoxon_p_raw",
         "significance_raw",
         "wilcoxon_q_bh",
@@ -315,15 +372,20 @@ def export_combined_sites_tables(
         "in_combined_figure",
     ]
     export_cols = [col for col in export_cols if col in stat_sub.columns]
-    detail_path = output_dir / "all_cancers_Import_activate_sites_comparison_table.csv"
+    detail_path = output_dir / f"all_cancers_{direction_short}_{target_regulation}_sites_comparison_table.csv"
     stat_sub[export_cols].to_csv(detail_path, index=False)
 
+    # Full BH set (all directions); plot uses in_combined_figure / hypothesis-concordant subset
     sig_only = stat_sub[stat_sub["is_bh_significant"]].copy()
-    sig_path = output_dir / "all_cancers_Import_activate_bh_significant_sites_table.csv"
+    sig_path = output_dir / f"all_cancers_{direction_short}_{target_regulation}_bh_significant_sites_table.csv"
     sig_only[export_cols].to_csv(sig_path, index=False)
 
+    hyp_sig = sig_only[sig_only.get("matches_hypothesis", True) == True].copy() if "matches_hypothesis" in sig_only.columns else sig_only
+    hyp_path = output_dir / f"all_cancers_{direction_short}_{target_regulation}_bh_significant_hypothesis_concordant_sites_table.csv"
+    hyp_sig[export_cols].to_csv(hyp_path, index=False)
+
     nonsig_only = stat_sub[~stat_sub["is_bh_significant"]].copy()
-    nonsig_path = output_dir / "all_cancers_Import_activate_nonsignificant_sites_table.csv"
+    nonsig_path = output_dir / f"all_cancers_{direction_short}_{target_regulation}_nonsignificant_sites_table.csv"
     nonsig_only[export_cols].to_csv(nonsig_path, index=False)
 
     summary_rows = []
@@ -333,24 +395,33 @@ def export_combined_sites_tables(
             {
                 "cancer_type": cancer_type,
                 "cancer_rank": cancer_rank.get(cancer_type, 999),
-                "n_import_activate_sites": int(len(cancer_sub)),
+                "n_sites": int(len(cancer_sub)),
                 "n_bh_significant": int(cancer_sub["is_bh_significant"].sum()),
                 "n_nonsignificant": int((~cancer_sub["is_bh_significant"]).sum()),
                 "n_in_combined_figure": int(cancer_sub["in_combined_figure"].sum()),
-                "n_known_positive_sites": int(cancer_sub["site_status"].eq("known_positive").sum()),
-                "n_new_predicted_sites": int(cancer_sub["site_status"].eq("new_predicted").sum()),
+                "n_known_positive_sites": int(
+                    cancer_sub["site_status"].isin(["known_positive", "known_containing"]).sum()
+                ),
+                "n_new_predicted_sites": int(
+                    cancer_sub["site_status"].isin(["new_predicted", "known_independent"]).sum()
+                ),
+                "n_known_proximal_sites": int(cancer_sub["site_status"].eq("known_proximal").sum()),
+                "n_known_containing_hotspots": int(cancer_sub["site_status"].eq("known_containing").sum()),
+                "n_known_independent_hotspots": int(cancer_sub["site_status"].eq("known_independent").sum()),
             }
         )
-    summary_path = output_dir / "all_cancers_Import_activate_sites_by_cancer_summary.csv"
+    summary_path = output_dir / f"all_cancers_{direction_short}_{target_regulation}_sites_by_cancer_summary.csv"
     pd.DataFrame(summary_rows).to_csv(summary_path, index=False)
 
     print(f"Saved table: {detail_path} ({len(stat_sub)} rows)")
     print(f"Saved table: {sig_path} ({len(sig_only)} rows)")
+    print(f"Saved table: {hyp_path} ({len(hyp_sig)} rows)")
     print(f"Saved table: {nonsig_path} ({len(nonsig_only)} rows)")
     print(f"Saved table: {summary_path}")
     return {
         "all_sites": detail_path,
         "significant": sig_path,
+        "significant_hypothesis_concordant": hyp_path,
         "nonsignificant": nonsig_path,
         "summary": summary_path,
     }
@@ -382,8 +453,19 @@ def plot_all_significant_sites_combined(
     if sig_entries.empty:
         raise ValueError("No significant sites found to plot.")
 
-    group_color_map = {"low": "#8FAFBC", "high": "#E3A07A"}
-    site_label_color_map = {"known_positive": "#C97B49", "new_predicted": "#5E8FA1"}
+    group_color_map = {"low": "#0072B2", "high": "#C93C37"}
+    use_hotspot_colors = "hotspot_class" in df_points.columns and df_points["hotspot_class"].notna().any()
+    if use_hotspot_colors:
+        site_label_color_map = dict(HOTSPOT_STATUS_COLOR_MAP)
+        status_legend_map = dict(HOTSPOT_STATUS_LEGEND)
+        status_order = ["known_containing", "known_proximal", "known_independent"]
+    else:
+        site_label_color_map = {"known_positive": "#C97B49", "new_predicted": "#5E8FA1"}
+        status_legend_map = {
+            "known_positive": LEGEND_LABELS["known_positive"],
+            "new_predicted": LEGEND_LABELS["new_predicted"],
+        }
+        status_order = ["known_positive", "new_predicted"]
 
     pair_offset = 0.16
     site_step = 1.0
@@ -397,6 +479,7 @@ def plot_all_significant_sites_combined(
     x_centers: List[float] = []
     ticklabels: List[str] = []
     ticklabel_colors: List[str] = []
+    plotted_statuses: List[str] = []
     stat_positions: List[float] = []
     stat_labels: List[str] = []
     plotted_rows: List[Dict[str, object]] = []
@@ -427,13 +510,16 @@ def plot_all_significant_sites_combined(
         box_colors.extend([group_color_map["low"], group_color_map["high"]])
         scatter_colors.extend([group_color_map["low"], group_color_map["high"]])
 
-        site_status = pipeline.site_label_status(
-            site_sub.drop_duplicates(subset=["site", "ACC_ID", "RESIDUE", "POSITION"]),
-            direction_short,
+        site_status = _resolve_site_status(site_sub, pipeline, direction_short)
+        default_color = (
+            HOTSPOT_STATUS_COLOR_MAP["known_independent"]
+            if use_hotspot_colors
+            else site_label_color_map["new_predicted"]
         )
         x_centers.append(current_x)
         ticklabels.append(_format_x_label(cancer_type, site_label))
-        ticklabel_colors.append(site_label_color_map.get(site_status, site_label_color_map["new_predicted"]))
+        ticklabel_colors.append(site_label_color_map.get(site_status, default_color))
+        plotted_statuses.append(site_status)
         stat_positions.append(current_x)
         stat_labels.append(pipeline._plot_significance_from_row(sig_row))
 
@@ -444,6 +530,10 @@ def plot_all_significant_sites_combined(
                 "site_label": site_label,
                 "target_regulation": target_regulation,
                 "x_label": ticklabels[-1],
+                "site_status": site_status,
+                "hotspot_class": site_sub["hotspot_class"].dropna().astype(str).iloc[0]
+                if "hotspot_class" in site_sub.columns and site_sub["hotspot_class"].notna().any()
+                else "",
                 "n_paired_target_genes": n_box_points,
                 "significance_bh": stat_labels[-1],
                 "delta_high_minus_low": float(sig_row.get("delta_high_minus_low", np.nan)),
@@ -490,18 +580,23 @@ def plot_all_significant_sites_combined(
         rng=rng,
     )
 
-    label_rotation = 55 if n_groups > 12 else 0
-    label_ha = "right" if label_rotation else "center"
+    # Combined plot ticklabels are "Cancer: hotspot" — always slant to avoid overlap
+    # (even with ~8 groups; previously only n_groups>12 triggered rotation).
+    label_rotation = 55
+    label_ha = "right"
     label_fontsize = 11.5 if n_groups > 24 else 12.5
     ax.set_xticks(x_centers)
     ax.set_xticklabels(ticklabels, rotation=label_rotation, ha=label_ha, fontsize=label_fontsize)
-    for tick_label, tick_color in zip(ax.get_xticklabels(), ticklabel_colors):
+    for tick_label, tick_color, status in zip(ax.get_xticklabels(), ticklabel_colors, plotted_statuses):
         tick_label.set_color(tick_color)
-        if tick_color == site_label_color_map["known_positive"]:
+        if status in ("known_positive", "known_containing"):
             tick_label.set_fontweight("bold")
 
     ax.set_ylabel("Mean target expression", fontsize=14.0)
-    ax.set_xlabel("Cancer: phosphosite", fontsize=14.0)
+    ax.set_xlabel(
+        "Cancer: phospho-hotspot" if use_hotspot_colors else "Cancer: phosphosite",
+        fontsize=14.0,
+    )
     ax.tick_params(axis="x", length=0)
     ax.grid(axis="y", linestyle=":", linewidth=0.5, alpha=0.28)
     ax.grid(axis="x", visible=False)
@@ -532,20 +627,35 @@ def plot_all_significant_sites_combined(
     handles = [
         Patch(facecolor=group_color_map["low"], edgecolor="#333333", label=LEGEND_LABELS["low"]),
         Patch(facecolor=group_color_map["high"], edgecolor="#333333", label=LEGEND_LABELS["high"]),
-        Line2D([0], [0], color=site_label_color_map["known_positive"], marker="o", linestyle="",
-               markersize=5, label=LEGEND_LABELS["known_positive"]),
-        Line2D([0], [0], color=site_label_color_map["new_predicted"], marker="o", linestyle="",
-               markersize=5, label=LEGEND_LABELS["new_predicted"]),
     ]
+    for status_key in status_order:
+        if status_key not in plotted_statuses:
+            continue
+        handles.append(
+            Line2D(
+                [0],
+                [0],
+                color=site_label_color_map[status_key],
+                marker="o",
+                linestyle="",
+                markersize=5,
+                label=status_legend_map[status_key],
+            )
+        )
     legend = fig.legend(
         handles=handles,
         frameon=False,
         fontsize=10.5,
         loc="upper center",
         bbox_to_anchor=(0.5, -0.04 if label_rotation else -0.10),
-        ncol=4,
+        ncol=min(5, len(handles)),
     )
-    ax.set_title(FIGURE_TITLE, fontsize=14.5, pad=8)
+    title = (
+        f"All BH-significant {direction_short} {target_regulation}-target phospho-hotspots across cancers"
+        if use_hotspot_colors
+        else f"All BH-significant {direction_short} {target_regulation}-target phosphosites across cancers"
+    )
+    ax.set_title(title, fontsize=14.5, pad=8)
 
     bottom = 0.34 if label_rotation else 0.24
     plt.tight_layout()
@@ -555,7 +665,7 @@ def plot_all_significant_sites_combined(
     bbox_extra = tick_artists + list(ax.get_yticklabels()) + [ax.yaxis.get_label(), legend]
 
     saved_paths: List[Path] = []
-    out_base = output_dir / "All_cancers_Import_activate_significant_sites_combined_boxplot"
+    out_base = output_dir / f"All_cancers_{direction_short}_{target_regulation}_significant_sites_combined_boxplot"
     for ext in ["png", "pdf", "svg"]:
         out_path = out_base.with_suffix(f".{ext}")
         fig.savefig(
@@ -592,7 +702,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    base = _CPTAC_ROOT / "scripts"
+    base = Path(__file__).resolve().parent
     points_csv = args.points_csv if args.points_csv.is_absolute() else base / args.points_csv
     stats_csv = args.stats_csv if args.stats_csv.is_absolute() else base / args.stats_csv
     sig_csv = args.significant_csv if args.significant_csv.is_absolute() else base / args.significant_csv

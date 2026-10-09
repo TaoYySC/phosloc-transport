@@ -1,15 +1,15 @@
 # Finalized training and analysis runs
 
-This repository keeps the scripts and configs used to train the two main classifiers (Localization-Regulatory Classifier and Localization Direction Classifier) and to reproduce the reference CPTAC analysis.
+This repository keeps the scripts and configs used to train the two main classifiers (Stages 1–2) and to reproduce the reference CPTAC **phospho-hotspot** analysis (Stage 3).
 
 ---
 
-## Run 1 — Localization-Regulatory Classifier (ESM Window + Site + PDB)
+## Run 1 — Functional Transport (ESM Window + Site + PDB)
 
 | Field | Value |
 |-------|-------|
 | **Original output** | `results/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/` |
-| **Task** | Localization-regulatory phosphosite classification |
+| **Task** | Functional Transport |
 | **Feature set** | `esm_graph` (ESM window-31 + AlphaFold graph) |
 | **Model** | `esm_cnn2d_site_gnn` |
 | **CV** | Fixed test (20%) + 5-fold StratifiedGroupKFold on development set |
@@ -33,6 +33,7 @@ functional/configs/
 
 ```bash
 cd functional
+export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/1_1_run_experiment.py \
   --experiment_cfg configs/experiments/esm_window_site_pdb.yaml \
@@ -68,12 +69,12 @@ python scripts/1_1_run_experiment.py \
 
 ---
 
-## Run 2 — Localization Direction Classifier (ESM Window + SupCon+CE, Import positive)
+## Run 2 — Import vs Export (ESM Window + SupCon+CE, Import positive)
 
 | Field | Value |
 |-------|-------|
 | **Original output** | `results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export/` |
-| **Task** | Localization direction classification |
+| **Task** | Import vs Export |
 | **Feature set** | `esm_window_only_supcon_ce` |
 | **Model** | `supcon_ce` (PLS-64 + SupCon+CE) |
 | **Positive class** | Import (LABEL=1) |
@@ -97,6 +98,7 @@ import_export/configs/
 
 ```bash
 cd import_export
+export PYTHONPATH="${PWD}:${PYTHONPATH}"
 
 python scripts/run_import_export_experiment.py \
   --experiment_cfg configs/experiments/import_export_esm_window_only_supcon_ce_import_pos.yaml \
@@ -170,22 +172,31 @@ results/run_<timestamp>_<output_tag>/
 ## Prerequisites
 
 1. Install dependencies: `pip install -r requirements.txt`
-2. Optional for Stage 3: uncomment `pyensembl` in `requirements.txt`, then rerun `pip install -r requirements.txt`
+2. Optional: uncomment and install `pyensembl` in [`requirements.txt`](../requirements.txt) (Stage 3)
 3. Symlink large data dirs (see `functional/data/README.md`, `cptac_analysis/data/README.md`)
 4. Cluster CSVs included under each subproject's `data/cluster/` (one file per run); ESM embeddings and PDB must be prepared locally
 
 ---
 
-## Run 3 — CPTAC import target-regulation analysis (reference)
+## Run 3 — CPTAC phospho-hotspot target-regulation analysis (reference)
+
+Manuscript-aligned Stage 3 analysis is **hotspot-level** (not per-phosphosite).
 
 | Field | Value |
 |-------|-------|
-| **Reference output** | `cptac_analysis/results/import_target_regulation/` |
-| **Task** | Import-associated phosphosite target-gene regulation across cancers |
-| **Script** | `cptac_analysis/scripts/run_import_target_regulation_analysis.py` |
-| **Stable import predictions** | `import_export/data/precomputed/1_transport_classifier_results/joint_score/predicted_import_stable_gt0p6_vote4.csv` |
-| **Phospho split** | `median_nonmissing` on site phosphoproteomics abundance |
-| **Abundance primary mode** | `residual` (TF protein adjustment when available) |
-| **Random controls** | 100 matched iterations, seed 42 |
+| **Fig. 5 reference output** | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` |
+| **Fig. 4 reference output** | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_mean_z_median_20260914/` |
+| **Task** | Phospho-hotspot activity vs signed TF target-gene expression (Import/Export × activate/repress) |
+| **Catalog script** | `cptac_analysis/scripts/build_hotspots_mixed_pred_filter.py` |
+| **Direction gate** | `reannotate_hotspot_pure_direction.py` (pure nuclear / pure cytoplasmic) |
+| **Scan script** | `cptac_analysis/scripts/run_hotspot_target_regulation_analysis.py` |
+| **Catalog** | Known∪Predicted; adj≤15 aa; span≤40 aa; 99 Mixed/Predicted hotspots (85 TFs) |
+| **Activity** | Per-cancer **mean z-score** of measured hotspot members (`mean_z`) |
+| **Phospho split** | `median_nonmissing` on hotspot activity |
+| **Fig. 5 stats** | Two-sided tests; BH within cancer among evaluable (`n ≥ 10`); regulon_only |
+| **Figure panels** | Fig. 5 heatmap (`plot_two_sided_four_arm_significance_heatmap.py`); Fig. 4b–4f / 4A–C as above |
+| **Fig. 5b concordance** | Import×act 17/20; Import×rep 0/1; Export×act 16/45; Export×rep 8/13 |
 
-See **[cptac_analysis/README.md](../cptac_analysis/README.md)** for plotting scripts and full command examples.
+Legacy unit-site reference (not manuscript primary): `results/import_target_regulation/` via `run_import_target_regulation_analysis.py`.
+
+See **[cptac_analysis/README.md](../cptac_analysis/README.md)** for full commands and output paths.
