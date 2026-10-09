@@ -25,14 +25,17 @@ FOLD_DIR_PATTERN = re.compile(r"fold_(\d+)", re.IGNORECASE)
 
 DEFAULT_ARTIFACT_ROOT = (
     PROJECT_ROOT
-    / "data/model_artifacts/run_20260610_204935_ESM Window+Site+PDB/Functional_Transport/artifacts"
+    / "data/model_artifacts"
+    / "run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge"
+    / "Functional_Transport"
+    / "artifacts"
 )
 DEFAULT_INPUT_CSV = PROJECT_ROOT / "data/dataset_phos_site/tf_all_phos_site_for_prediction.csv"
 DEFAULT_FASTA_PATH = PROJECT_ROOT / "data/fasta/transcription_fasta.fasta"
 DEFAULT_OUTPUT_CSV = (
     PROJECT_ROOT
     / "results/2_1_functional_classifier_results/predictions"
-    / "esm_window_site_pdb_5_folds_ensemble_predictions.csv"
+    / "v11_147pos_5_folds_ensemble_predictions.csv"
 )
 DEFAULT_EXPECTED_FOLDS = 5
 
@@ -41,7 +44,8 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description=(
             "Predict with saved FuncTransport model artifacts using the five fold "
-            "checkpoints under run_20260610_204935_ESM Window+Site+PDB by default."
+            "checkpoints under run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge "
+            "by default."
         )
     )
     parser.add_argument(

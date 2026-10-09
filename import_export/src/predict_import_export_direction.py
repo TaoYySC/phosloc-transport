@@ -5,7 +5,7 @@
 Predict Import vs Export for new phosphosites using saved fold artifacts.
 
 Default preset: ESM Window only + SupCon+CE, Import=LABEL 1
-  run_dir: results/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export
+  run_dir: data/model_artifacts/run_20260904_134712_ie147_R3D_D3_kpls_gauto/Import_vs_Export
   input:   functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv
 
 Each fold artifact contains pipeline.joblib (PLS feature transform) and model.joblib.
@@ -49,11 +49,13 @@ DEFAULT_INPUT_CSV = (
 DEFAULT_FASTA = PROJECT_ROOT / "data/fasta/transcription_fasta.fasta"
 DEFAULT_RUN_DIR = (
     PROJECT_ROOT
-    / "data/model_artifacts/run_20260612_125646_esm_window_only_supcon_ce_import_pos/Import_vs_Export"
+    / "data/model_artifacts"
+    / "run_20260904_134712_ie147_R3D_D3_kpls_gauto"
+    / "Import_vs_Export"
 )
 DEFAULT_OUTPUT_CSV = (
     PROJECT_ROOT
-    / "results/1_transport_classifier_results/esm_window_only_import_pos_predictions"
+    / "results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt"
     / "tf_all_phos_site_predictions.csv"
 )
 DEFAULT_FEATURE_SET = "esm_window_only_supcon_ce"
