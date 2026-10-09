@@ -4,6 +4,8 @@ This document maps manuscript panels to scripts in the monorepo. Script names re
 
 All paths are relative to each subproject root (`functional/` or `import_export/`).
 
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
+
 ## Setup
 
 1. Install dependencies from the repo root: `pip install -r requirements.txt`
@@ -18,13 +20,17 @@ Inference uses `data/model_artifacts/`. New figures are written to `results/`.
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
 | Figure 1c,d,e; Supp. Fig. 1a,b | `plot_dataset_description.py` | `data/dataset_phos_site/TF_positive_phos_site_0608.csv`, `data/TF_family/TF_Information.txt` | `results/0_dataset_description/` |
-| Figure 2b | `plot_model_ablation_comparison.py` | `data/precomputed/run_20260610_*/*/metrics_all_folds.csv` | `results/2_1_functional_classifier_results/model_ablation_comparison/` |
+| Figure 2b | `plot_model_ablation_comparison.py` | `data/precomputed/` metrics (v11 / legacy) | `results/2_1_functional_classifier_results/model_ablation_comparison/` |
 | Figure 2c | `benchmark_funcphos_str_seq.py` | `data/precomputed/` (fixed test + FuncPhos scores) | `results/2_1_functional_classifier_results/benchmark_results/` |
 | Supp. Fig. 2b | `plot_functional_score_distribution.py` | `data/precomputed/.../predictions/`, site tables | `results/2_1_functional_classifier_results/distribution/` |
-| Supp. Fig. 2c,d,e | `plot_functional_validation_scores.py` | `data/precomputed/.../predictions/`, cluster table | `results/2_1_functional_classifier_results/single_model_rank_eval_5_folds_ensemble/` |
+| Supp. Fig. 2c,d,e | `plot_functional_validation_scores.py` | `v11_147pos_5_folds_ensemble_predictions.csv`, cluster table | `results/2_1_functional_classifier_results/single_model_rank_eval_5_folds_ensemble/` |
 | Supp. Fig. 3a–i | `plot_functional_feature_panel.py` | `data/precomputed/.../predictions/`, `data/features/` | `results/2_1_functional_classifier_results/feature_boxplot_stacked_barplot/functional_selected_panel/` |
-| **Prediction** | `predict_functional_transport.py` | `data/model_artifacts/.../artifacts/`, site CSV, FASTA | `results/2_1_functional_classifier_results/predictions/` |
+| **Prediction** | `predict_functional_transport.py` | v11 model artifacts, site CSV, FASTA | `results/2_1_functional_classifier_results/predictions/` |
 | **Training** | `1_1_run_experiment.py` | Experiment YAML, cluster CSV, embeddings/PDB | `results/run_*/Functional_Transport/` |
+
+Figure S2e uses unadjusted empirical one-sided permutation P values for significance annotations (1,000 permutations; *P < 0.05).
+
+Table S3 reports unadjusted empirical one-sided P values from 1,000 within-protein permutations with a plus-one correction.
 
 Example:
 
@@ -38,12 +44,12 @@ python scripts/predict_functional_transport.py --device cpu
 
 | Panel | Script | Main inputs | Output directory |
 |-------|--------|-------------|------------------|
-| Figure 3b | `plot_import_export_model_performance.py` | `data/precomputed/.../metrics_all_runs.csv` | `results/1_transport_classifier_results/model_performance/` |
-| Figure 3c | `calculate_joint_direction_score.py` | `functional/data/precomputed/...`, IE per-fold predictions in `data/precomputed/` | `results/1_transport_classifier_results/joint_score/` |
-| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + functional ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/esm_window_only_supcon_ce_import_pos_score_distribution_platt/` |
-| Figure 3d; Supp. Fig. 4d | `plot_import_export_feature_panel.py` | `data/precomputed/.../joint_score/`, `../functional/data/features/` | `results/4_1_feature_boxplot_stacked_barplot/importexport_selected_panel_no_negative/` |
-| **Prediction** | `predict_import_export_direction.py` | `data/model_artifacts/.../fold_artifacts/`, Platt calibrator | `results/1_transport_classifier_results/esm_window_only_import_pos_predictions/` |
-| **Training** | `run_import_export_experiment.py` | Experiment YAML, cluster CSV, embeddings | `results/run_*/Import_vs_Export/` |
+| Figure 3b | `plot_import_export_model_performance.py` | D3 / legacy metrics in `data/precomputed/` | `results/1_transport_classifier_results/model_performance/` |
+| Figure 3c | `calculate_joint_direction_score.py` | `v11_147pos_5_folds_ensemble_predictions.csv`, D3 Platt per-fold predictions | `results/1_transport_classifier_results/joint_score_v11_147pos_d3_platt/` |
+| Supp. Fig. 4a,b | `plot_import_export_score_distribution.py` | OOF + functional ensemble predictions in `data/precomputed/` | `results/1_transport_classifier_results/` |
+| Figure 3d; Supp. Fig. 4d | `plot_import_export_feature_panel.py` | `joint_score_v11_147pos_d3_platt/`, `../functional/data/features/` | `results/4_1_feature_boxplot_stacked_barplot/importexport_selected_panel_no_negative/` |
+| **Prediction** | `predict_import_export_direction.py` | D3 fold artifacts + Platt calibrator | `results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/` |
+| **Training** | `run_import_export_experiment.py` | `import_export_ie147_D3_kpls_gauto.yaml` | `results/run_20260904_134712_ie147_R3D_D3_kpls_gauto/Import_vs_Export/` |
 
 Example:
 
@@ -59,10 +65,11 @@ python scripts/predict_import_export_direction.py --device cpu
 All paths are relative to `cptac_analysis/`. Requires `pyensembl` and a populated `data/source/` directory (see [cptac_analysis/data/README.md](../cptac_analysis/data/README.md)).
 
 **Manuscript primary analysis is hotspot-level** (`build_hotspots_mixed_pred_filter.py`).
-Figure **4A–C** covers spatial / direction definition; Figure **5** is the four-arm
-two-sided CPTAC scan (heatmap + concordance). Per-arm association drafts still call
-`plot_hotspot_figure4.py` (historical script name). Supp. Fig. 2e enrichment stars use
-**unadjusted permutation P** (`* P < 0.05`); BH q values are listed in Table S3.
+
+- Figure 4c: representative phospho-hotspots in STAT1 (T699 to S708), AR (S647 to T653) and CUX1 (Y1209 to S1218).
+- Figure 5: hotspot-associated target-gene expression across four categories defined by localization direction and target regulation (Nuclear accumulation × activate/repress and cytoplasmic redistribution × activate/repress).
+
+The primary analysis uses two-sided Wilcoxon signed-rank tests on paired target-gene expression summaries. Associations require at least 10 paired target genes. BH correction is applied within each cancer type and localization direction × target regulation category.
 
 | Panel / output | Script | Main inputs | Output directory |
 |----------------|--------|-------------|------------------|
@@ -75,15 +82,16 @@ two-sided CPTAC scan (heatmap + concordance). Per-arm association drafts still c
 | Table **S4** associations | `analyze_two_sided_concordance.py` | concordance flags CSV | `../supplement/Supplemental_Table_4.xlsx` |
 | Table **S3** co-regulatory enrichment | `../functional/scripts/plot_functional_validation_scores.py` | reported co-regulatory (cluster-sheet) sites | `../supplement/Supplemental_Table_3.xlsx` |
 | Hotspot Cox / KM | `run_hotspot_survival_cox.py` | BH-significant cancer×hotspot pairs | `results/survival_analysis/hotspot_cox_*` |
-| Legacy unit-site examples (STAT1 / AR / CUX1) | `plot_phosphosite_across_cancers.py` | unit-site CPTAC outputs | `results/phosphosite_across_cancers_boxplots/` |
+| Legacy unit-site scan | `run_import_target_regulation_analysis.py` / `plot_phosphosite_across_cancers.py` | unit-site CPTAC outputs | `results/import_target_regulation/` |
 
-Example (catalog + Figure 5):
+Table S4 lists all evaluable cancer–hotspot associations, including raw P values, BH-adjusted q values and BH significance flags.
+
+Example (catalog + Figure 5 + Figure 4c):
 
 ```bash
 cd cptac_analysis
 bash scripts/run_four_arm_twosided_pipeline.sh
-# or the explicit four-arm CLI in cptac_analysis/README.md
-python scripts/run_figure4_spatial_direction_panels.py
+python scripts/run_figure4_spatial_direction_panels.py --only 4c
 ```
 
 See [cptac_analysis/README.md](../cptac_analysis/README.md) for Methods catalog rules, Figure 5b counts, and legacy unit-site commands.

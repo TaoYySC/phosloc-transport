@@ -11,9 +11,12 @@ directionally consistent **signed TF target-gene expression** across cancer type
 (not `build_phospho_hotspots.py`). Catalog: Known ∪ Predicted; adjacent gap ≤15 aa;
 **span ≤40 aa**; keep **Mixed evidence** or **Predicted candidate**; then pure nuclear /
 pure cytoplasmic direction gates; `mean_z` activity; `median_nonmissing` High/Low split.
-Figure 5 reports a **four-arm, two-sided** scan (Import/Export × activate/repress)
-with BH correction within cancer among evaluable associations. Per-phosphosite
-(unit-site) runs are retained only as legacy / sensitivity outputs.
+Figure 5 reports hotspot-associated target-gene expression across four categories
+defined by localization direction and target regulation (Nuclear accumulation ×
+activate/repress and cytoplasmic redistribution × activate/repress). The primary
+analysis uses two-sided Wilcoxon signed-rank tests; BH correction is applied within
+each cancer type and localization direction × target regulation category.
+Per-phosphosite (unit-site) runs are retained only as legacy / sensitivity outputs.
 
 ## Analysis overview
 
@@ -37,7 +40,7 @@ The primary pipeline:
 | [`scripts/reannotate_hotspot_pure_direction.py`](scripts/reannotate_hotspot_pure_direction.py) | Pure nuclear/cytoplasmic Import/Export gates |
 | [`scripts/run_hotspot_target_regulation_analysis.py`](scripts/run_hotspot_target_regulation_analysis.py) | Hotspot CPTAC scan (defaults: distance=15, regulon_only, two-sided) |
 | [`scripts/run_four_arm_twosided_pipeline.sh`](scripts/run_four_arm_twosided_pipeline.sh) | **Full four-arm Figure 5 runner** |
-| [`scripts/analyze_two_sided_concordance.py`](scripts/analyze_two_sided_concordance.py) | Figure **5b** concordance vs expected direction; Table S4 flags |
+| [`scripts/analyze_two_sided_concordance.py`](scripts/analyze_two_sided_concordance.py) | Figure **5b** concordance; Table S4 association table |
 | [`scripts/plot_two_sided_four_arm_significance_heatmap.py`](scripts/plot_two_sided_four_arm_significance_heatmap.py) | Figure **5** four-arm hotspot × cancer heatmap |
 | [`scripts/plot_hotspot_figure4.py`](scripts/plot_hotspot_figure4.py) | Per-arm association example panels (script name historical) |
 | [`scripts/run_figure4_spatial_direction_panels.py`](scripts/run_figure4_spatial_direction_panels.py) | Figure **4A–C** / S5 spatial & direction panels (not CPTAC stratification) |
@@ -155,9 +158,15 @@ python scripts/run_figure4_spatial_direction_panels.py
 - Fixed size: **99** hotspots (48 Mixed / 51 Predicted) on **85** TFs
 - Do **not** treat equal hotspot counts from `build_phospho_hotspots.py` as the same definition
 
-Figure 5b concordance among BH-significant evaluable associations (two-sided; within-cancer BH):
+**Figure 4c:** representative phospho-hotspots in STAT1 (T699 to S708), AR (S647 to T653)
+and CUX1 (Y1209 to S1218).
+
+**Figure 5:** hotspot-associated target-gene expression across four categories defined by
+localization direction and target regulation (Nuclear accumulation × activate/repress and
+cytoplasmic redistribution × activate/repress).
+
+Figure 5b concordance among BH-significant evaluable associations:
 Import×activate **17/20**, Import×repress **0/1**, Export×activate **16/45**, Export×repress **8/13**.
-Supplemental Table S4 lists all evaluable associations (significant and non-significant).
 
 ## Reference output directories
 
@@ -166,37 +175,42 @@ Supplemental Table S4 lists all evaluable associations (significant and non-sign
 | Primary hotspot catalog | `results/import_target_regulation_hotspot_v11_147pos_d3_platt/hotspots_mixed_pred_filter/` |
 | Pure-direction catalog | `.../hotspots_mixed_pred_filter_pure_direction/` |
 | **Fig. 5 four-arm two-sided (primary)** | `results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` |
-| Earlier Import-focused association drafts | `results/hotspot_mixed_pred_filter_pure_mean_z_median_20260914/` |
 | Spatial Fig 4A–C / S5 | `results/figure4_spatial_direction_panels_v11_147pos_d3_platt/` |
 | Hotspot Cox | `results/survival_analysis/hotspot_cox_*` |
-| Legacy unit-site pipeline | `results/import_target_regulation/` / `results/import_target_regulation_v11_147pos_d3_platt/` |
 | Tables S3–S4 (repo) | [`../supplement/`](../supplement/) |
+| Legacy unit-site pipeline | `results/import_target_regulation/` / `results/import_target_regulation_v11_147pos_d3_platt/` |
 
-## Legacy unit-site analysis
+## Statistical notes (Figure 5 / Table S4)
 
-Unit-site stratification is **not** the manuscript primary analysis. Example panels
-aligned with current figure labels (STAT1 / AR / CUX1):
+The primary analysis uses two-sided Wilcoxon signed-rank tests on paired target-gene
+expression summaries. Associations require at least 10 paired target genes. BH correction
+is applied within each cancer type and localization direction × target regulation category.
+
+- Table S3 reports unadjusted empirical one-sided P values from 1,000 within-protein
+  permutations with a plus-one correction.
+- Table S4 lists all evaluable cancer–hotspot associations, including raw P values,
+  BH-adjusted q values and BH significance flags.
+
+## Representative hotspot examples (Figure 4c)
 
 ```bash
 cd cptac_analysis
+python scripts/run_figure4_spatial_direction_panels.py --only 4c
+# exemplars: STAT1_T699-S708, AR_S647-T653, CUX1_Y1209-S1218
+```
 
+## Legacy unit-site analysis
+
+Unit-site stratification is **not** the manuscript primary analysis:
+
+```bash
+cd cptac_analysis
 python scripts/run_import_target_regulation_analysis.py
-python scripts/plot_phosphosite_across_cancers.py \
-  --site-labels STAT1_T699-S708 AR_S647-T653 CUX1_Y1209-S1218
+python scripts/plot_phosphosite_across_cancers.py
 python scripts/plot_significant_sites_combined.py
 ```
 
 Default legacy outputs: `results/import_target_regulation/`.
-
-## Statistical notes (Figure 5 / Table S4)
-
-- Test: two-sided Wilcoxon / Mann–Whitney on High vs Low **hotspot activity**
-- Evaluable: ≥10 paired target genes; BH **within cancer** among evaluable tests in that arm
-- Table S4 columns include Hotspot direction, Target regulation, Test alternative,
-  BH significant, and Matches expected direction
-- Table S3 (reported co-regulatory site enrichment) is produced by
-  `functional/scripts/plot_functional_validation_scores.py`; figure stars use
-  **unadjusted permutation P** (`* P < 0.05`), with BH q reported in the table for transparency
 
 ## Related documentation
 

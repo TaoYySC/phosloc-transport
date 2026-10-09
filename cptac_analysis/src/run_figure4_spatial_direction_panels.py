@@ -3,7 +3,7 @@
 
 Figure 4A  HC Predicted close-pair enrichment (obs/expected) at 10/15/25/40/50 aa
 Figure 4B  Directional coherence of catalog hotspots vs matched pseudo-hotspots
-Figure 4C  Three representative hotspot schematics (STAT3 / AR / SIX4)
+Figure 4C  Three representative hotspot schematics (STAT1 / AR / CUX1)
 Figure S5A Predicted→Known proximity ECDF (supporting)
 Figure S5B Exploratory comparison: local phospho-hotspots vs literature multi-site regions
 Figure S5C Sensitivity heatmap over adj×span grid
@@ -89,13 +89,13 @@ C_TEXT = "#333333"
 
 EXEMPLARS = (
     {
-        "gene": "STAT3",
-        "uniprot": "P40763",
-        "length": 770,
-        "start": 686,
+        "gene": "STAT1",
+        "uniprot": "P42224",
+        "length": 750,
+        "start": 699,
         "end": 708,
-        "title": "STAT3 (P40763)",
-        "subtitle": "Mixed evidence hotspot 686–708 · nuclear accumulation-consistent",
+        "title": "STAT1 (P42224)",
+        "subtitle": "Mixed evidence hotspot 699–708 · nuclear accumulation-consistent",
     },
     {
         "gene": "AR",
@@ -107,13 +107,13 @@ EXEMPLARS = (
         "subtitle": "Mixed evidence hotspot 647–653 · cytoplasmic redistribution-consistent",
     },
     {
-        "gene": "SIX4",
-        "uniprot": "Q9UIU6",
-        "length": 781,
-        "start": 282,
-        "end": 308,
-        "title": "SIX4 (Q9UIU6)",
-        "subtitle": "Predicted-candidate hotspot 282–308 · cytoplasmic redistribution-consistent",
+        "gene": "CUX1",
+        "uniprot": "P39880",
+        "length": 1505,
+        "start": 1209,
+        "end": 1218,
+        "title": "CUX1 (P39880)",
+        "subtitle": "Predicted-candidate hotspot 1209–1218 · cytoplasmic redistribution-consistent",
     },
 )
 
@@ -1731,7 +1731,7 @@ def write_readme(out: Path, summaries: Dict) -> None:
         f"- Null: {s4b['null_definition']}",
         "",
         "## Figure 4C — Representative hotspots (PSP-style full-length)",
-        "- Separate files: STAT3 / AR / SIX4 full-length tracks with Known, HC Predicted, other observed sites; hotspot span shaded.",
+        "- Separate files: STAT1 / AR / CUX1 full-length tracks with Known, HC Predicted, other observed sites; hotspot span shaded.",
         "",
         "## Figure S5A — Predicted→Known proximity (supporting)",
         f"- HC median dist→Known: **{s5a['obs_median_dist_hc']:.3f}** vs null **{s5a['null_mean_median_dist']:.3f}** ({p_to_star(s5a['empirical_p_left'])})",

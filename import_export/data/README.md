@@ -2,8 +2,11 @@
 
 Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
+
 The processed data bundles are available from the shared Zenodo record:
-[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
+[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685)
+(plus the v11 hotspot inputs add-on for manuscript joint scores).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
@@ -15,11 +18,11 @@ The processed data bundles are available from the shared Zenodo record:
 | Path | Purpose |
 |------|---------|
 | `cluster/` | Training CD-HIT clusters |
-| `dataset_phos_site/` | Direction-labeled transport-positive sites |
+| `dataset_phos_site/` | Direction-labeled transport-positive sites (147 manuscript) |
 | `fasta/` | TF FASTA sequences (copy of `functional/data/fasta`) |
 | `TF_esm_embedding/` | ESM-2 embeddings (copy of `functional/data/TF_esm_embedding`) |
-| `model_artifacts/` | Finalized IE fold artifacts + Platt calibrator (inference) |
-| `precomputed/` | Bundled CSV inputs for figure / joint-score scripts |
+| `model_artifacts/` | Preferred: D3 run `run_20260904_134712_ie147_R3D_D3_kpls_gauto/` |
+| `precomputed/` | Manuscript joint scores under `.../joint_score_v11_147pos_d3_platt/` |
 
 Negatives, Localization-Regulatory Classifier ensemble predictions, and manual features are loaded from `../functional/data/`.
 

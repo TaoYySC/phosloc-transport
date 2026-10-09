@@ -1120,7 +1120,7 @@ for k in ks:
 
 cluster_hit_summary = pd.DataFrame(cluster_hit_rows)
 cluster_hit_summary["empirical_q_bh"] = benjamini_hochberg(cluster_hit_summary["empirical_p_greater"])
-cluster_hit_summary["star"] = cluster_hit_summary["empirical_q_bh"].apply(p_to_star)
+cluster_hit_summary["star"] = cluster_hit_summary["empirical_p_greater"].apply(p_to_star)
 
 observed_mean_cluster_max_score = float(cluster_level_summary["cluster_score_max"].mean())
 random_mean_cluster_max_scores = random_score_matrix.mean(axis=0)

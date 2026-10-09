@@ -85,9 +85,9 @@ cd import_export
 
 python scripts/predict_import_export_direction.py \
   --input_csv ../functional/data/dataset_phos_site/tf_all_phos_site_for_prediction.csv \
-  --output_csv results/1_transport_classifier_results/esm_window_only_import_pos_predictions/custom_import_export_predictions.csv \
+  --output_csv results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/custom_import_export_predictions.csv \
   --device cpu \
-  --save_dropped_csv results/1_transport_classifier_results/esm_window_only_import_pos_predictions/custom_dropped_rows.csv
+  --save_dropped_csv results/1_transport_classifier_results/d3_kpls_gauto_predictions_platt/custom_dropped_rows.csv
 ```
 
 Main output columns include `mean_prob_import`, `std_prob_import`, `mean_prob_export`, `std_prob_export`, `threshold`, `pred_label`, and `pred_direction`. The script also writes a per-fold prediction table (`*_per_fold.csv`) and run metadata (`*_run_meta.json`). Platt calibration is enabled by default when `platt_calibrator.json` is present.
@@ -148,6 +148,10 @@ directories.
 | Functional training, prediction, and plotting data | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 | Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
 | CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
+| v11 hotspot inputs add-on (required for Fig. 5 / S3–S4) | see [`DATA.md`](DATA.md) | Same Zenodo record (new version; pending Publish) |
+| Optional Fig. 5 result snapshot | `cptac_analysis/results/...twosided_20260929/` | Same Zenodo record (new version; pending Publish) |
+
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
 
 Reproducing the finalized runs requires processed feature files, training splits, model configs, and run metadata snapshots bundled under each subproject's `data/` and `configs/` trees. Without the data bundles, the repository can be inspected but training, prediction, plotting, and CPTAC analysis will not run end to end.
 

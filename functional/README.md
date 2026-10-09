@@ -6,6 +6,8 @@ Localization-Regulatory Classifier training and inference pipeline for the PhosL
 
 This subproject trains a binary classifier that predicts whether a transcription factor phosphosite is likely to have **functional nuclear transport regulatory activity**, compared with background phosphosites. It does **not** predict nuclear accumulation versus cytoplasmic redistribution direction; direction classification is handled by the [`import_export/`](../import_export/) subproject.
 
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
+
 ## Finalized model
 
 | Field | Value |
@@ -16,6 +18,7 @@ This subproject trains a binary classifier that predicts whether a transcription
 | Window size | 31 |
 | Training set | **147** positives / **868** negatives (after distance filter) |
 | Original run directory | `results/run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge/Functional_Transport/` |
+| Ensemble predictions | `data/precomputed/.../v11_147pos_5_folds_ensemble_predictions.csv` |
 | Run metadata | [`configs/runs/esm_window_site_pdb_run_meta.json`](configs/runs/esm_window_site_pdb_run_meta.json) |
 
 ## Predict new sites

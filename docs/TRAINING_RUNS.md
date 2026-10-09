@@ -2,7 +2,9 @@
 
 This repository keeps the scripts and configs used to train the two main classifiers (Stages 1–2) and to reproduce the reference CPTAC **phospho-hotspot** analysis (Stage 3).
 
-Manuscript-aligned defaults below use the **147-positive / 868-negative** Functional Transport set and the **D3 kernel-PLS** Import/Export model. Older 124-pos / SupCon+CE-PLS-64 runs are retained only as legacy snapshots.
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
+
+Manuscript-aligned defaults below use the **147-positive / 868-negative** Functional Transport set (`run_20260831_183836_ESM Window+Site+PDB_147pos_roc08_v11_xlarge`), the **D3 kernel-PLS** Import/Export model (`run_20260904_134712_ie147_R3D_D3_kpls_gauto`), Stage 1 predictions `v11_147pos_5_folds_ensemble_predictions.csv`, and joint scores under `joint_score_v11_147pos_d3_platt/`.
 
 ---
 

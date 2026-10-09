@@ -6,6 +6,8 @@ Localization Direction Classifier training and inference pipeline for the PhosLo
 
 This subproject trains a binary classifier that predicts **nuclear accumulation versus cytoplasmic redistribution** among annotated transport-positive transcription factor phosphosites. Historical model labels and file paths use `Import` as the positive class and `Export` as the negative class. It does **not** classify functional transport activity against background phosphosites; that task is handled by the [`functional/`](../functional/) subproject.
 
+Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
+
 ## Finalized model
 
 | Field | Value |
@@ -18,6 +20,7 @@ This subproject trains a binary classifier that predicts **nuclear accumulation 
 | Window size | 41 |
 | Labeled sites | **147** Import/Export positives |
 | Original run directory | `results/run_20260904_134712_ie147_R3D_D3_kpls_gauto/Import_vs_Export/` |
+| Joint scores | `data/precomputed/1_transport_classifier_results/joint_score_v11_147pos_d3_platt/` |
 | Run metadata | [`configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json`](configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json) |
 
 ## Predict new sites
