@@ -14,7 +14,7 @@ Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier run
 
 Upload the **code repo** and **data directories** separately if needed.
 All processed data bundles are available from one Zenodo record:
-[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
+[`10.5281/zenodo.23262124`](https://doi.org/10.5281/zenodo.23262124).
 The root-level `PhosLoc-Transport_DATA_README.txt` is intended as the README
 shipped beside the Zenodo archives. This file is the canonical in-repository
 data inventory.
@@ -22,19 +22,16 @@ data inventory.
 | Upload unit | Path | Approx. size | Download / DOI |
 |-------------|------|--------------|----------------|
 | Code | repo root (exclude `**/data/` large dirs) | ~55 MB | GitHub repository |
-| Base data bundles | `functional/data/`, `import_export/data/`, `cptac_analysis/data/source/` | ~12 GB | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
-| v11 hotspot inputs (add-on) | see archive layout below | ~5 MB | Same Zenodo record (new version; upload `PhosLoc-Transport_v11_hotspot_inputs.tar.gz`) |
-| Fig. 5 results (optional) | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` | ~122 MB packed | Same Zenodo record (`PhosLoc-Transport_fig5_twosided_results.tar.gz`) |
+| Base data bundles | `functional/data/`, `import_export/data/`, `cptac_analysis/data/source/` | ~12 GB | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| v11 hotspot inputs (add-on) | see archive layout below | ~5 MB | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) (`PhosLoc-Transport_v11_hotspot_inputs.tar.gz`) |
+| Fig. 5 results (optional) | `cptac_analysis/results/hotspot_mixed_pred_filter_pure_regulon_only_twosided_20260929/` | ~122 MB packed | Not in current Zenodo v3; regenerate from v11 + CPTAC inputs |
 
-**New Zenodo files prepared locally** under `zenodo_upload/` (draft upload in progress; replace this note with the published version DOI after Publish):
+Published Zenodo v3 ([10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124)) includes the three base archives, `PhosLoc-Transport_v11_hotspot_inputs.tar.gz`, and `PhosLoc-Transport_DATA_README.txt`. The v11 hotspot add-on is required for Figure 5 / Tables S3–S4.
 
 | Archive | Extracts to | Contents |
 |---------|-------------|----------|
 | `PhosLoc-Transport_v11_hotspot_inputs.tar.gz` | repo root prefixes | 147-pos set, cluster-sheet co-regulatory sites, v11 ensemble predictions, v11 joint scores + summary, hotspot catalogs |
-| `PhosLoc-Transport_fig5_twosided_results.tar.gz` | `cptac_analysis/results/...twosided_20260929/` | Optional four-arm two-sided result snapshot |
-| `PhosLoc-Transport_DATA_README.txt` | beside archives | Updated install notes (repo URL: `phosloc-transport`) |
-
-Until the new version is published, cite the existing concept DOI and note that v11/hotspot add-ons are required for Figure 5 / Tables S3–S4.
+| `PhosLoc-Transport_DATA_README.txt` | beside archives | Install notes (repo URL: `phosloc-transport`) |
 
 ## `functional/data/`
 

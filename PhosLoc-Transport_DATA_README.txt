@@ -5,6 +5,8 @@ This Zenodo record contains processed inputs and model artifacts for the
 PhosLoc-Transport pipelines (Localization-Regulatory Classifier, Localization
 Direction Classifier, and CPTAC phospho-hotspot validation).
 
+Version DOI: https://doi.org/10.5281/zenodo.23262124
+
 Source code (not included here):
   https://github.com/TaoYySC/phosloc-transport
 

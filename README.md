@@ -137,7 +137,7 @@ is a companion note for the external Zenodo data bundle; [`DATA.md`](DATA.md)
 remains the canonical in-repository data inventory.
 
 The processed data bundles and model artifacts are available from Zenodo:
-[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
+[`10.5281/zenodo.23262124`](https://doi.org/10.5281/zenodo.23262124).
 Download the required archive(s) from the Zenodo record and extract them from
 the repository root so the bundled top-level paths restore the expected
 `functional/data/`, `import_export/data/`, and `cptac_analysis/data/source/`
@@ -145,11 +145,11 @@ directories.
 
 | Data bundle | Target path | Download / DOI |
 |-------------|-------------|----------------|
-| Functional training, prediction, and plotting data | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
-| Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
-| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
-| v11 hotspot inputs add-on (required for Fig. 5 / S3–S4) | see [`DATA.md`](DATA.md) | Same Zenodo record (new version; pending Publish) |
-| Optional Fig. 5 result snapshot | `cptac_analysis/results/...twosided_20260929/` | Same Zenodo record (new version; pending Publish) |
+| Functional training, prediction, and plotting data | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| Nuclear accumulation / cytoplasmic redistribution training, prediction, and plotting data | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| CPTAC / ChIP / regulon source bundle | `cptac_analysis/data/source/` | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| v11 hotspot inputs add-on (required for Fig. 5 / S3–S4) | see [`DATA.md`](DATA.md) | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| Optional Fig. 5 result snapshot | `cptac_analysis/results/...twosided_20260929/` | Not in current Zenodo v3; regenerate from v11 + CPTAC inputs |
 
 Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
 
@@ -231,7 +231,7 @@ Interactive resource: [TFLocPhos](https://compbio-zhanglab.org/tflocphos/).
 
 If you use PhosLoc-Transport or TFLocPhos, please cite the associated manuscript once available.
 For the accompanying processed data and model artifacts, cite the Zenodo record:
-[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685).
+[`10.5281/zenodo.23262124`](https://doi.org/10.5281/zenodo.23262124).
 
 ## License
 

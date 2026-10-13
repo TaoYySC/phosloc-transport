@@ -5,13 +5,13 @@ Full tree and upload notes: **[../../DATA.md](../../DATA.md)**.
 Default commands use the manuscript v11 Stage 1 and D3 Stage 2 runs. Earlier runs are retained as legacy versions.
 
 The processed data bundles are available from the shared Zenodo record:
-[`10.5281/zenodo.21064685`](https://doi.org/10.5281/zenodo.21064685)
+[`10.5281/zenodo.23262124`](https://doi.org/10.5281/zenodo.23262124)
 (plus the v11 hotspot inputs add-on for manuscript joint scores).
 
 | Bundle | Target path | Download / DOI |
 |--------|-------------|----------------|
-| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
-| Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.21064685](https://doi.org/10.5281/zenodo.21064685) |
+| Localization Direction Classifier data bundle | `import_export/data/` | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
+| Shared functional data bundle | `functional/data/` | [Zenodo DOI: 10.5281/zenodo.23262124](https://doi.org/10.5281/zenodo.23262124) |
 
 ## Directory summary
 
