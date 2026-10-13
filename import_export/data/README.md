@@ -17,7 +17,7 @@ The processed data bundles are available from the shared Zenodo record:
 
 | Path | Purpose |
 |------|---------|
-| `cluster/` | Training CD-HIT clusters |
+| `cluster/` | Training CD-HIT clusters (`ie_train_window41_c70_cluster.csv`) |
 | `dataset_phos_site/` | Direction-labeled transport-positive sites (147 manuscript) |
 | `fasta/` | TF FASTA sequences (copy of `functional/data/fasta`) |
 | `TF_esm_embedding/` | ESM-2 embeddings (copy of `functional/data/TF_esm_embedding`) |

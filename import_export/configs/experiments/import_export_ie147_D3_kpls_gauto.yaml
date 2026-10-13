@@ -1,7 +1,7 @@
 data:
   positive_csv: data/dataset_phos_site/TF_positive_phos_site_0608.csv
   fasta_path: data/fasta/transcription_fasta.fasta
-  cluster_csv: data/cluster/ie_train_window21_c70_cluster.csv
+  cluster_csv: data/cluster/ie_train_window41_c70_cluster.csv
   positive_class: import
 
 configs:

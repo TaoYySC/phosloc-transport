@@ -77,7 +77,7 @@ functional/data/
 ```text
 import_export/data/
 |-- cluster/
-|   `-- ie_train_window21_c70_cluster.csv            # training clusters
+|   `-- ie_train_window41_c70_cluster.csv            # Stage 2 CD-HIT clusters (window-41)
 |-- dataset_phos_site/
 |   `-- TF_positive_phos_site_0608.csv               # 147 Import/Export positives
 |-- fasta                                           # copy/symlink of functional/data/fasta

@@ -95,7 +95,7 @@ Large fold checkpoints ship via Zenodo, not Git. Point `data/model_artifacts/` o
 | **Model** | `supcon_ce` on D3 reduced features (`train_d3_kpls_gauto.yaml`) |
 | **Positive class** | Import (LABEL=1); **147** labeled Import/Export sites |
 | **CV** | 5-fold StratifiedGroupKFold, seed 42 |
-| **Cluster** | `data/cluster/ie_train_window21_c70_cluster.csv` |
+| **Cluster** | `data/cluster/ie_train_window41_c70_cluster.csv` |
 | **Run meta** | `configs/runs/ie147_R3D_D3_kpls_gauto_run_meta.json` |
 | **Downstream joint scores** | `import_export/data/precomputed/1_transport_classifier_results/joint_score_v11_147pos_d3_platt/` |
 
